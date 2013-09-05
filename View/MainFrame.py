@@ -10,11 +10,16 @@ class MyFrame(wx.Frame):
     def __init__(self,_permission,netconnect,msg):
         wx.Frame.__init__(self, None, -1, "审核部门",size = (1024,800))
         
+        self.peername = msg[0]
+        self.peerpermission = msg[1]
+        self.username = msg[2]
+        print msg
+        
         self.__vbox_top = wx.BoxSizer(wx.VERTICAL)
         self.__hbox = wx.BoxSizer(wx.HORIZONTAL)
         self.__panel_top = wx.Panel(self)
         
-        self.createHeadStaticText(text = "您好:" + "username" + ",欢迎使用CUCAuditSys!"+ "\n")
+        self.createHeadStaticText(text = "您好:" + self.username + ",欢迎使用CUCAuditSys!"+ "\n")
         self.createHeadStaticText(align = wx.ALIGN_LEFT,text ="\n" + " 中国传媒大学内容审核系统" + "\n",fontsize = 15,fontcolor = "blue",backcolor = "bisque")
         self.__vbox_top.Add(wx.StaticLine(self.__panel_top), 0, wx.EXPAND|wx.ALL, 5)
         self.createMenuBar()
@@ -30,7 +35,11 @@ class MyFrame(wx.Frame):
         
         self.registerPublisher()
         
+        self.__gridCurPos = -1
+        self.__showTextColor = True
+        
         self.netconnect = netconnect
+        self.netconnect.ReqFileList()
     
     def createPanel(self,outpanel,color = "mistyrose"):
         _panel = wx.Panel(outpanel,-1)

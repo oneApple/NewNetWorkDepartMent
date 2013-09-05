@@ -24,10 +24,9 @@ class ConfigData:
     
     def GetAuditServerAddress(self):
         "获取审核服务器地址"
-        _name = self.__cfg.get("auditserver", "name")
         _ip = self.__cfg.get("auditserver", "ip")
         _port = self.__cfg.get("auditserver", "port")
-        return _name,_ip, _port
+        return _ip, _port
     
     def GetContentServerAddress(self):
         "获取内容服务器地址"

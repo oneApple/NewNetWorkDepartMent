@@ -9,11 +9,11 @@ from GlobalData import MagicNum, CommonData
 from NetCommunication import NetConnect
 
 class LoginDialog(ValidaDialog.ValidaDialog,object):
-    def __init__(self,netconnect,type,servername,ip,port):
+    def __init__(self,netconnect,type):
         super(LoginDialog,self).__init__("登录",MagicNum.ValidaDialogc.IMAGEBUTTON)
         if not netconnect:
             self.__netconnect = NetConnect.NetConnect(self)
-            if self.__netconnect.StartNetConnect(servername,ip,port) == MagicNum.NetConnectc.NOTCONNECT:
+            if self.__netconnect.StartNetConnect() == MagicNum.NetConnectc.NOTCONNECT:
                 self.setHeaderText("无法连接到服务器，请重新启动") 
         else :
             self.__netconnect = netconnect
@@ -54,6 +54,6 @@ class LoginDialog(ValidaDialog.ValidaDialog,object):
         
 if __name__=='__main__':
     app = wx.PySimpleApp()
-    dlg = LoginDialog(None,1001,1,"localhost",8080)
+    dlg = LoginDialog(None,1001)
     dlg.Run()
     app.MainLoop()

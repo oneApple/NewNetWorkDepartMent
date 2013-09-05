@@ -7,13 +7,12 @@ from MsgHandle import MsgHandleMap
 _metaclass_ = type
 class NetThread(threading.Thread):
     "网络通信线程"
-    def __init__(self,sock,control,peername):
+    def __init__(self,sock,control):
         super(NetThread,self).__init__()
         self.sockfd = sock
         self.runflag = True
         self.control = control
         self.currentbytes = 0
-        self.peername = peername
         
     def run(self):
         "接受消息头之后，得到消息类型，然后选择具体的处理类来处理该消息"
