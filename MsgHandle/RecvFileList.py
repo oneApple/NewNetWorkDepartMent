@@ -12,6 +12,10 @@ class RecvFileList(MsgHandleInterface.MsgHandleInterface,object):
     
     def HandleMsg(self,bufsize,session):
         recvbuffer = session.sockfd.recv(bufsize)
-        _fileList = recvbuffer.split(CommonData.MsgHandlec.PADDING)                                                                                       
-        wx.CallAfter(Publisher().sendMessage,CommonData.ViewPublisherc.MAINFRAME_SELECTFILE,_fileList)
+        _fileList = recvbuffer.split(CommonData.MsgHandlec.PADDING) 
+        table = []
+        for index in range(len(_fileList) / 2):
+            _singleFile = [_fileList[index * 2],_fileList[index * 2 + 1],"已审核"]
+            table.append(_singleFile)                                                                                      
+        wx.CallAfter(Publisher().sendMessage,CommonData.ViewPublisherc.MAINFRAME_REFRESHNETFILETABLE,table)
         

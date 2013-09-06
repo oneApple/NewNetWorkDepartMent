@@ -5,7 +5,7 @@ from wx.lib.pubsub  import Publisher
 import ValidaDialog
 import RegisterDialog
 import MainFrame
-from GlobalData import MagicNum, CommonData
+from GlobalData import MagicNum, CommonData, ConfigData
 from NetCommunication import NetConnect
 
 class LoginDialog(ValidaDialog.ValidaDialog,object):
@@ -13,7 +13,9 @@ class LoginDialog(ValidaDialog.ValidaDialog,object):
         super(LoginDialog,self).__init__("登录",MagicNum.ValidaDialogc.IMAGEBUTTON)
         if not netconnect:
             self.__netconnect = NetConnect.NetConnect(self)
-            if self.__netconnect.StartNetConnect() == MagicNum.NetConnectc.NOTCONNECT:
+            config = ConfigData.ConfigData()
+            _auditAddress = config.GetAuditServerAddress()
+            if self.__netconnect.StartNetConnect(_auditAddress) == MagicNum.NetConnectc.NOTCONNECT:
                 self.setHeaderText("无法连接到服务器，请重新启动") 
         else :
             self.__netconnect = netconnect

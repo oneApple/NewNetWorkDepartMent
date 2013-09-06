@@ -63,14 +63,12 @@ class NetConnect:
         _msghead = struct.pack(CommonData.MsgHandlec.MSGHEADTYPE,MagicNum.MsgTypec.REQFILELIST, 0)
         self.__Sockfd.send(_msghead)
         
-    def StartNetConnect(self):
+    def StartNetConnect(self,address):
         "连接服务器并开启网络线程"
         try:
             import string
-            config = ConfigData.ConfigData()
-            _auditAddress = config.GetAuditServerAddress()
-            print _auditAddress
-            self.__Sockfd.connect((_auditAddress[0],string.atoi(_auditAddress[1])))
+            print address
+            self.__Sockfd.connect((address[0],string.atoi(address[1])))
         except Exception,e:
             print e
             return MagicNum.NetConnectc.NOTCONNECT

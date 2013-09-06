@@ -18,9 +18,11 @@ class ViewPublisherc:
     REGISTER_TRYAGAIN = "registertryagain"
     REGISTER_SWITCH = "registerswitch"
     
-    MAINFRAME_SELECTFILE = "mainframeselectfile"
     MAINFRAME_REWRITETEXT = "mainframerewritetext"
     MAINFRAME_APPENDTEXT = "mainframeappendtext"
+    MAINFRAME_REFRESHSTATIC = "mainframerefstatic"
+    MAINFRAME_REFRESHNETFILETABLE = "mainframerefnetfiletable"
+    MAINFRAME_REFRESHLOCALFILETABLE = "mainframereflocalfiletable"
     
 
 class MainFramec:

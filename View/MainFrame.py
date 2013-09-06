@@ -35,7 +35,8 @@ class MyFrame(wx.Frame):
         
         self.registerPublisher()
         
-        self.__gridCurPos = -1
+        self.__gridNetCurPos = -1
+        self.__gridLocalCurPos = -1
         self.__showTextColor = True
         
         self.netconnect = netconnect
@@ -81,16 +82,25 @@ class MyFrame(wx.Frame):
         showmsg += "当前正在进行操作:" + _recvmsg[1]
         self.__infoStatic.SetLabel(showmsg)
     
-    def refreshFileList(self,recvmsg = ""):
+    def refreshNetFileList(self,recvmsg):
         "更新文件列表"
-        _filelist = self.getFileList()
+        _filelist = recvmsg.data
         _m = MatrixTable.MatrixTable(_filelist,["文件名","所有者","状态"],[i for i in range(len(_filelist))])
-        self.__grid.ClearGrid()#清空表格
-        self.__grid.SetTable(_m)
-        self.__grid.Hide()
-        self.__grid.Show()
+        self.__netFileTable.ClearGrid()#清空表格
+        self.__netFileTable.SetTable(_m)
+        self.__netFileTable.Hide()
+        self.__netFileTable.Show()
+        
+    def refreshLocalFileList(self,recvmsg = ""):
+        "更新文件列表"
+        _filelist = self.getLocalFileList()
+        _m = MatrixTable.MatrixTable(_filelist,["文件名","所有者","状态"],[i for i in range(len(_filelist))])
+        self.__localFileTable.ClearGrid()#清空表格
+        self.__localFileTable.SetTable(_m)
+        self.__localFileTable.Hide()
+        self.__localFileTable.Show()
     
-    def getFileList(self):
+    def getLocalFileList(self):
         "获取文件列表"
         _filelist = []
         _cfg = ConfigData.ConfigData()
@@ -119,36 +129,43 @@ class MyFrame(wx.Frame):
     def evtGridRowLabelLeftClick(self,evt):
         "左键单击行标签"
         _pos = evt.GetRow()
+        _grid = evt.GetEventObject()
+        if _grid == self.__netFileTable:
+            _gridCurPos = self.__gridNetCurPos
+            self.__gridNetCurPos = _pos
+        else:
+            _gridCurPos = self.__gridLocalCurPos
+            self.__gridLocalCurPos = _pos
         
-        if _pos == -1 or _pos == self.__gridCurPos:
+        if _pos == -1 or _pos == _gridCurPos:
             return
         
         attr = wx.grid.GridCellAttr()
         attr.SetTextColour("white")
         attr.SetBackgroundColour("pink")
-        self.__grid.SetRowAttr(_pos, attr)
+        _grid.SetRowAttr(_pos, attr)
         
-        if self.__gridCurPos != -1:
+        if _gridCurPos != -1:
             attr = wx.grid.GridCellAttr()
-            self.__grid.SetRowAttr(self.__gridCurPos, attr)
+            _grid.SetRowAttr(_gridCurPos, attr)
         
         #_filename = self.__grid.GetCellValue(self.__gridCurPos,0)
         #self.refreshStaticText([_filename,"选择"])
-        
-        self.__gridCurPos = _pos
-        self.__grid.Hide()
-        self.__grid.Show()
+        _grid.Hide()
+        _grid.Show()
     
     def createLeftFileTable(self,panel,vbox,label):
         "文件列表"
         _panel = self.createPanel(panel)
-        self.__grid = wx.grid.Grid(_panel)
-        table = MatrixTable.MatrixTable(self.getFileList(),["文件名","所有者","状态"],[i for i in range(3)])
-        self.__grid.SetTable(table, True)
-        self.__grid.SetRowLabelSize(15)
+        _grid = wx.grid.Grid(_panel)
+        table = MatrixTable.MatrixTable(self.getLocalFileList(),["文件名","所有者","状态"],[i for i in range(3)])
+        _grid.SetTable(table, True)
+        _grid.SetRowLabelSize(15)
         self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.evtGridRowLabelLeftClick)
         
-        self.createBox([self.__grid,], _panel, vbox, label,partition = 2)
+        self.createBox([_grid,], _panel, vbox, label,partition = 2)
+        
+        return _grid
     
     def createLeft1Static(self,panel,hbox):
         ""
@@ -164,25 +181,76 @@ class MyFrame(wx.Frame):
         
         return stext
     
+    def evtBtnRefreshNetFileClick(self,evt):
+        self.netconnect.ReqFileList() 
+    
+    def evtBtnReqFileClick(self,evt):
+        _ownername = self.__netFileTable.GetCellValue(self.__gridNetCurPos,1)
+        
+        from NetCommunication import NetConnect
+        _contentSocket = NetConnect.NetConnect(self)
+        _cfg = ConfigData.ConfigData();
+        addrlist = _cfg.GetContentServerAddress()
+        print _ownername ,addrlist
+        namelist = addrlist[0].split(",")
+        iplist = addrlist[1].split(",")
+        portlist = addrlist[2].split(",")
+        for index in range(len(namelist)):
+            if namelist[index] == _ownername:
+                _contentSocket.StartNetConnect([iplist[index],portlist[index]])
+        
+        return
+    
     def createLeft3Button(self,panel,vbox):
         _panel = self.createPanel(panel)
         
         _Button1 = wx.Button(_panel,-1,"刷新列表")
-        #self.Bind(wx.EVT_BUTTON,self.evtBtnAuditClick ,_Button1)
+        self.Bind(wx.EVT_BUTTON,self.evtBtnRefreshNetFileClick ,_Button1)
         _Button2 = wx.Button(_panel,-1,"获取文件")
-        #self.Bind(wx.EVT_BUTTON,self.evtBtnSamplingClick ,_Button2)
+        self.Bind(wx.EVT_BUTTON,self.evtBtnReqFileClick ,_Button2)
         #self.Bind(wx.EVT_BUTTON,self.evtBtnDelClick ,_Button3)
         
         self.createBox([_Button1,_Button2], _panel, vbox, "",partition = 0.5,align = wx.ALIGN_RIGHT)
+    
+    def evtBtnDelClick(self,evt):
+        "删除按钮触发事件"
+        if self.__gridLocalCurPos == -1:
+            return
+        
+        _filename = self.__localFileTable.GetCellValue(self.__gridLocalCurPos,0)
+        _ownername = self.__localFileTable.GetCellValue(self.__gridLocalCurPos,1)
+        _cfg = ConfigData.ConfigData()
+        _path = _cfg.GetMediaPath() + "/" + _ownername + "/" + _filename
+        
+        _db = MediaTable.MediaTable()
+        _db.Connect()
+        _db.deleteMedia(_filename,_ownername)
+        _db.CloseCon()
+        
+        try:
+            os.remove(_path)
+            if os.listdir(_cfg.GetMediaPath() + "/" + _ownername) == []:
+                os.rmdir(_cfg.GetMediaPath() + "/" + _ownername)
+        except:
+            pass
+        
+        self.__gridLocalCurPos = -1
+        self.refreshStaticText([_filename,"删除"])
+        self.refreshLocalFileList()
+    
+    def evtBtnReqIdentifyClick(self,evt):
+        "请求责任认定"
+        _filename = self.__localFileTable.GetCellValue(self.__gridLocalCurPos,0)
+        _ownername = self.__localFileTable.GetCellValue(self.__gridLocalCurPos,1)
+        self.netconnect.ReqIdentify(_ownername,_filename)
     
     def createLeft5Button(self,panel,vbox):
         _panel = self.createPanel(panel)
         
         _Button1 = wx.Button(_panel,-1,"责任认定")
-        #self.Bind(wx.EVT_BUTTON,self.evtBtnAuditClick ,_Button1)
-        #self.Bind(wx.EVT_BUTTON,self.evtBtnSamplingClick ,_Button2)
+        self.Bind(wx.EVT_BUTTON,self.evtBtnReqIdentifyClick ,_Button1)
         _Button2 = wx.Button(_panel,-1,"删除")
-        #self.Bind(wx.EVT_BUTTON,self.evtBtnDelClick ,_Button3)
+        self.Bind(wx.EVT_BUTTON,self.evtBtnDelClick ,_Button2)
         
         self.createBox([_Button1,_Button2], _panel, vbox, "",partition = 0.5,align = wx.ALIGN_RIGHT)
     
@@ -195,12 +263,12 @@ class MyFrame(wx.Frame):
         
         vbox.Add(wx.StaticLine(panel), 0, wx.EXPAND|wx.ALL, 20)
         
-        self.createLeftFileTable(panel,vbox,"已审核的文件")
+        self.__netFileTable = self.createLeftFileTable(panel,vbox,"已审核的文件")
         self.createLeft3Button(panel, vbox)
         
         vbox.Add(wx.StaticLine(panel), 0, wx.EXPAND|wx.ALL, 20)
         
-        self.createLeftFileTable(panel,vbox,"已获取的文件")
+        self.__localFileTable = self.createLeftFileTable(panel,vbox,"已获取的文件")
         self.createLeft5Button(panel, vbox)
         
         panel.SetSizer(vbox)
@@ -232,7 +300,8 @@ class MyFrame(wx.Frame):
         self.createBox([self.__showText,], _panel, self.__hbox, "信息显示区",3)
     
     def registerPublisher(self):
-        Publisher().subscribe(self.selectFile, CommonData.ViewPublisherc.MAINFRAME_SELECTFILE)    
+        Publisher().subscribe(self.refreshNetFileList, CommonData.ViewPublisherc.MAINFRAME_REFRESHNETFILETABLE)
+        Publisher().subscribe(self.refreshStaticText, CommonData.ViewPublisherc.MAINFRAME_REFRESHSTATIC)        
         Publisher().subscribe(self.rewriteShowTextCtrl, CommonData.ViewPublisherc.MAINFRAME_REWRITETEXT)    
         Publisher().subscribe(self.appendShowTextCtrl, CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT)    
     
