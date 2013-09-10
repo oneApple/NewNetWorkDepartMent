@@ -45,6 +45,6 @@ if __name__=='__main__':
     a.Connect()
     #a.deleteTable()
     #a.CreateTable()
-    a.AddNewMedia(["a","cp","signParam","sign","signHash"])
+    #a.AddNewMedia(["a","cp","signParam","sign","signHash"])
     #a.deleteMedia("shiyan.mpg","cp")
     print a.Search("select * from MediaTable")

@@ -69,20 +69,20 @@ class RecvSignElgamal12(MsgHandleInterface.MsgHandleInterface,object):
         _efm.WaitForProcess()
         
         import os
-        showmsg = CommonData.MsgHandlec.SPARATE +"采样完成:\n(1)总帧数：" + self.getFrameNum(session.filename) + \
+        showmsg = "采样完成:\n(1)总帧数：" + self.getFrameNum(session.filename) + \
                   "\n(2)文件大小(byte)：" + str(os.path.getsize(_meidaPath))
-        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_REWRITETEXT, showmsg)
+        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg,True)
         
         _filename = session.filename[:session.filename.index(".")]
         
         showmsg = "Ａ组采样过程:"
-        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, CommonData.MsgHandlec.SPARATE + showmsg)
+        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg, True)
         _gvs = GetVideoSampling.GetVideoSampling(_filename,*_aparam)
         self.__sampling = CommonData.MsgHandlec.PADDING.join(_gvs.GetSampling())       
     
     def compareSamplingHash(self,localhash,recvhash):
         "分组验证"
-        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, CommonData.MsgHandlec.SPARATE + "分组进行比对:")
+        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, "分组进行比对:", True)
         difList = []
         localhash = localhash.split(CommonData.MsgHandlec.PADDING)
         recvlist = recvhash.split(CommonData.MsgHandlec.PADDING)
@@ -151,7 +151,7 @@ class RecvSignElgamal12(MsgHandleInterface.MsgHandleInterface,object):
             self.sendHashELgamal(session)
             self.compareSamplingHash(self.__sampling,self.__NoaHash)
             showmsg = "网络运营商和内容提供商无过错"
-        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, CommonData.MsgHandlec.SPARATE + showmsg)
+        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg, True)
     
     def deltempFile(self,session):
         import os

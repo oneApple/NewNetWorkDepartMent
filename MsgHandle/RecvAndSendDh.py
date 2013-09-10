@@ -34,7 +34,7 @@ class RecvAndSendDh(MsgHandleInterface.MsgHandleInterface,object):
             msghead = self.packetMsg(MagicNum.MsgTypec.SENDDHPUBKEY, len(msgbody))
             session.sockfd.send( msghead + msgbody ) 
             showmsg = "会话密钥:" + session.sessionkey
-        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, CommonData.MsgHandlec.SPARATE + showmsg)
+        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg, True)
     
     def HandleMsg(self,bufsize,session):
         if session.control.ThreadType == CommonData.ThreadType.CONNECTAP:

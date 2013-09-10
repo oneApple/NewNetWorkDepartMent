@@ -52,15 +52,15 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
         _efm.WaitForProcess()
         
         import os
-        showmsg = CommonData.MsgHandlec.SPARATE +"采样完成:\n(1)总帧数：" + self.getFrameNum(session.filename) + \
+        showmsg = "采样完成:\n(1)总帧数：" + self.getFrameNum(session.filename) + \
                   "\n(2)文件大小(byte)：" + str(os.path.getsize(_meidaPath))
-        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_REWRITETEXT, showmsg)
+        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg, True)
         
         _filename = session.filename[:session.filename.index(".")]
         _gvs = GetVideoSampling.GetVideoSampling(_filename,*_aparam)
         
-        showmsg = CommonData.MsgHandlec.SPARATE + "A组采样过程："
-        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg)
+        showmsg = "A组采样过程："
+        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg,True)
         self.__sampling = CommonData.MsgHandlec.PADDING.join(_gvs.GetSampling())
         
     def addMediaToTable(self,session,sign,hash):
@@ -73,7 +73,7 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
              
     def compareSamplingHash(self,recvhash):
         "分组验证"
-        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, CommonData.MsgHandlec.SPARATE + "分组进行比对:")
+        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,"分组进行比对:",True)
         difList = []
         localhash = self.__sampling.split(CommonData.MsgHandlec.PADDING)
         for i in range(len(recvhash)):
@@ -128,14 +128,15 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
                 msghead = self.packetMsg(MagicNum.MsgTypec.RECVMEDIASUCCESS,0)
                 session.sockfd.send(msghead)
                 showmsg = "收到采样结果:\n(1)A组参数：" + ",".join(self.__aparam) + "\n(2)A组采样签名：" + _msglist[1] + "\n(3)本地A组采样：" + self.__sampling
-                self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, CommonData.MsgHandlec.SPARATE + showmsg)
+                self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg,True)
+                self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_REFRESHLOCALFILETABLE,"")
                 return
             else:
                 _diflist = self.compareSamplingHash(_msglist[2:])
                 showmsg = "采样验证失败，该文件在传输过程中被篡改\n其中第" + ",".join(_diflist) + "组被篡改"
         else:
             showmsg = "会话密钥验证失败,发送方为恶意用户"
-        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, CommonData.MsgHandlec.SPARATE + showmsg)
+        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg, True)
         msghead = self.packetMsg(MagicNum.MsgTypec.IDENTITYVERIFYFAILED,0)
         session.sockfd.send(msghead)
         

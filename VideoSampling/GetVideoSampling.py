@@ -17,7 +17,7 @@ class GetVideoSampling:
         from wx.lib.pubsub  import Publisher
         from GlobalData import CommonData
         
-        wx.CallAfter(Publisher().sendMessage,CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,msg)     
+        wx.CallAfter(Publisher().sendMessage,CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,[msg,False])     
     
     def GetSampling(self):
         "第0帧不采集，帧区间是左闭又开区间，包括左边界，不包括右边界"

@@ -10,7 +10,10 @@ class MsgHandleInterface:
     def __init__(self):
         pass
         
-    def sendViewMsg(self,msgtype,msg):
+    def sendViewMsg(self,msgtype,showmsg,changeColor = False):
+        msg = [showmsg,changeColor]
+        if msgtype != CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT:
+            msg = showmsg
         wx.CallAfter(Publisher().sendMessage,msgtype,msg)
     
     def packetMsg(self,msgtype,msgbodysize):

@@ -35,14 +35,16 @@ class RecvDhGenerateSuccess(MsgHandleInterface.MsgHandleInterface,object):
         import string
         session.elgamal = Elgamal.Elgamal(*[string.atol(str(s)) for s in _params])
         elgamal1 = session.elgamal.EncryptoList(Elgamal.StringToList(self.getAgroupSign(session)))
+        print elgamal1
         _cipher = self.getCipherText(session,[str(s) for s in _params])
         _plaintext = session.control.auditfilename + CommonData.MsgHandlec.PADDING + \
                      session.control.auditusername + CommonData.MsgHandlec.PADDING + \
                      Elgamal.GetStructFmt(elgamal1) + CommonData.MsgHandlec.PADDING + \
-                     "".join(elgamal1)
-        showmsg = "A组签名的elgamal加密：\n(1)第一次加密:" + ",".join(elgamal1)
-        #self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg)
-        return _cipher + CommonData.MsgHandlec.PADDING + _plaintext
+                     repr("".join(elgamal1))
+        
+        showmsg = "A组签名的elgamal加密：\n(1)第一次加密:" + repr(",".join(elgamal1))
+        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg,True)
+        return repr(_cipher) + CommonData.MsgHandlec.PADDING + _plaintext
     
     def HandleMsg(self,bufsize,session):
         if session.control.ThreadType == CommonData.ThreadType.CONNECTCP:

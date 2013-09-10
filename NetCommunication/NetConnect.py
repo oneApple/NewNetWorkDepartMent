@@ -32,17 +32,17 @@ class NetConnect:
         _msghead = struct.pack(CommonData.MsgHandlec.MSGHEADTYPE,MagicNum.MsgTypec.REQREGISTERMSG,len(_msgbody))
         self.__Sockfd.send(_msghead + _msgbody.decode('gbk').encode("utf-8"))
         
-    def ReqFile(self,filename):
+    def ReqFile(self,filename,username):
         "请求分发文件" 
         self.ThreadType = CommonData.ThreadType.CONNECTCP
-        self.filename = filename
-        _msgbody = filename.encode("utf-8")
+        self.filename = filename 
+        _msgbody = filename + CommonData.MsgHandlec.PADDING + username
         _msghead = struct.pack(CommonData.MsgHandlec.MSGHEADTYPE,MagicNum.MsgTypec.REQOBTAINFILE, len(_msgbody))
         self.__Sockfd.send(_msghead + _msgbody)
         
         import wx
         from wx.lib.pubsub  import Publisher
-        wx.CallAfter(Publisher().sendMessage,CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,"请求分发文件(" + _msgbody + ")")
+        wx.CallAfter(Publisher().sendMessage,CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,["请求分发文件(" + filename + ")", False])
     
     def ReqIdentify(self,username,filename):
         "发送文件名和内容提供商名，请求责任认定"
@@ -56,23 +56,24 @@ class NetConnect:
         import wx
         from wx.lib.pubsub  import Publisher
         showmsg = "请求对内容提供商(" + username + ")的文件(" + filename + ")进行责任认定"
-        wx.CallAfter(Publisher().sendMessage,CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg)
+        wx.CallAfter(Publisher().sendMessage,CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,[showmsg, False])
     
     def ReqFileList(self):
         "请求文件列表"
         _msghead = struct.pack(CommonData.MsgHandlec.MSGHEADTYPE,MagicNum.MsgTypec.REQFILELIST, 0)
         self.__Sockfd.send(_msghead)
         
-    def StartNetConnect(self,address):
+    def StartNetConnect(self,address,peername = "auditserver"):
         "连接服务器并开启网络线程"
         try:
             import string
             print address
             self.__Sockfd.connect((address[0],string.atoi(address[1])))
         except Exception,e:
-            print e
+            import wx
+            wx.MessageBox(e,"错误",wx.ICON_ERROR|wx.YES_DEFAULT)
             return MagicNum.NetConnectc.NOTCONNECT
-        self.__netThread = NetThread.NetThread(self.__Sockfd.dup(),self)
+        self.__netThread = NetThread.NetThread(self.__Sockfd.dup(),self,peername)
         self.__netThread.start()
         
     def StopNetConnect(self):

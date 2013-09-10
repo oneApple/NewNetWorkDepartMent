@@ -111,6 +111,7 @@ class MyFrame(wx.Frame):
         
         for owner in _userDirList:
             _filenameList = os.listdir(_mediaPath + "/" + owner)
+            print _userDirList, _filenameList
             for filename in _filenameList:
                 _db = MediaTable.MediaTable()
                 _db.Connect()
@@ -197,7 +198,11 @@ class MyFrame(wx.Frame):
         portlist = addrlist[2].split(",")
         for index in range(len(namelist)):
             if namelist[index] == _ownername:
-                _contentSocket.StartNetConnect([iplist[index],portlist[index]])
+                if MagicNum.NetConnectc.NOTCONNECT == _contentSocket.StartNetConnect([iplist[index],portlist[index]],_ownername):
+                    return
+        
+        _filename = self.__netFileTable.GetCellValue(self.__gridNetCurPos,0)
+        _contentSocket.ReqFile(_filename,self.username)
         
         return
     
@@ -284,8 +289,17 @@ class MyFrame(wx.Frame):
         self.__showText.SetValue("\n".join(_textlist) + "\n")
     
     def appendShowTextCtrl(self,recvmsg):
-        msg = recvmsg.data
+        "添加新行"
+        msg = recvmsg.data[0].decode("utf8")
         msg += "\n"
+        
+        _isChangeColor = recvmsg.data[1]
+        if _isChangeColor:
+            if self.__showTextColor:
+                self.__showText.SetForegroundColour("orange")
+            else:
+                self.__showText.SetForegroundColour("black")
+            self.__showTextColor = not self.__showTextColor
         self.__showText.AppendText(msg)
     
     def createShowTextCtrl(self):
@@ -300,6 +314,7 @@ class MyFrame(wx.Frame):
         self.createBox([self.__showText,], _panel, self.__hbox, "信息显示区",3)
     
     def registerPublisher(self):
+        Publisher().subscribe(self.refreshLocalFileList, CommonData.ViewPublisherc.MAINFRAME_REFRESHLOCALFILETABLE)
         Publisher().subscribe(self.refreshNetFileList, CommonData.ViewPublisherc.MAINFRAME_REFRESHNETFILETABLE)
         Publisher().subscribe(self.refreshStaticText, CommonData.ViewPublisherc.MAINFRAME_REFRESHSTATIC)        
         Publisher().subscribe(self.rewriteShowTextCtrl, CommonData.ViewPublisherc.MAINFRAME_REWRITETEXT)    
