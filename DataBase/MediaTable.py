@@ -17,7 +17,6 @@ class MediaTable(DataBaseInterface.DataBaseInterface,object):
         "增加新的媒体"
         value += [MagicNum.MediaTablec.ACCEPT]
         try:
-            print value
             self.InsertValue("MediaTable",value)
         except sqlite3.IntegrityError:
             return False
@@ -47,4 +46,3 @@ if __name__=='__main__':
     #a.CreateTable()
     #a.AddNewMedia(["a","cp","signParam","sign","signHash"])
     #a.deleteMedia("shiyan.mpg","cp")
-    print a.Search("select * from MediaTable")

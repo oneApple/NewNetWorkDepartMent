@@ -8,9 +8,7 @@ class GetSamplingParams:
     def __init__(self,filename):
         "分别为文件名和分组数(参数Gt)"
         _cfg = ConfigData.ConfigData()
-        print os.getcwd()
         self.__filename = _cfg.GetYVectorFilePath() + filename
-        print self.__filename
         self.__gt = CommonData.Rsac.PLAINTLEN / CommonData.HashBySha1c.HEXHASH
         
     def getFrameNum(self):
@@ -43,4 +41,3 @@ class GetSamplingParams:
 
 if __name__ == "__main__":
     s = GetSamplingParams("../View/gaoqing_mpeg2")
-    print s.GetSamplingParams()

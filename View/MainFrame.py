@@ -8,12 +8,12 @@ import MatrixTable
 
 class MyFrame(wx.Frame):
     def __init__(self,_permission,netconnect,msg):
-        wx.Frame.__init__(self, None, -1, "审核部门",size = (1024,800))
+        wx.Frame.__init__(self, None, -1, "网络运营商",size = (1024,800))
         
         self.peername = msg[0]
         self.peerpermission = msg[1]
         self.username = msg[2]
-        print msg
+        self.__type = _permission
         
         self.__vbox_top = wx.BoxSizer(wx.VERTICAL)
         self.__hbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -111,7 +111,6 @@ class MyFrame(wx.Frame):
         
         for owner in _userDirList:
             _filenameList = os.listdir(_mediaPath + "/" + owner)
-            print _userDirList, _filenameList
             for filename in _filenameList:
                 _db = MediaTable.MediaTable()
                 _db.Connect()
@@ -149,9 +148,7 @@ class MyFrame(wx.Frame):
         if _gridCurPos != -1:
             attr = wx.grid.GridCellAttr()
             _grid.SetRowAttr(_gridCurPos, attr)
-        
-        #_filename = self.__grid.GetCellValue(self.__gridCurPos,0)
-        #self.refreshStaticText([_filename,"选择"])
+
         _grid.Hide()
         _grid.Show()
     
@@ -192,13 +189,13 @@ class MyFrame(wx.Frame):
         _contentSocket = NetConnect.NetConnect(self)
         _cfg = ConfigData.ConfigData();
         addrlist = _cfg.GetContentServerAddress()
-        print _ownername ,addrlist
         namelist = addrlist[0].split(",")
         iplist = addrlist[1].split(",")
         portlist = addrlist[2].split(",")
         for index in range(len(namelist)):
             if namelist[index] == _ownername:
                 if MagicNum.NetConnectc.NOTCONNECT == _contentSocket.StartNetConnect([iplist[index],portlist[index]],_ownername):
+                    wx.MessageBox("无法连接服务器","错误",wx.ICON_ERROR|wx.YES_DEFAULT)
                     return
         
         _filename = self.__netFileTable.GetCellValue(self.__gridNetCurPos,0)
@@ -337,35 +334,13 @@ class MyFrame(wx.Frame):
                 parentMenu.AppendSeparator()
             for _label in child:
                 self.createMenu(menu, _label, child[_label])
-#        elif label not in CommonData.MainFramec.disablemenu[self.__type]:
-#            menuitem = parentMenu.Append(-1,label)
-#            self.Bind(wx.EVT_MENU, getattr(self,"menu" + child + "Cmd"), menuitem) 
-#            parentMenu.AppendSeparator()           
-    
-    def selectFile(self,msg):
-        import SelectFileDialog
-        _dlg = SelectFileDialog.SelectFileDialog(self.netconnect,msg.data)
-        _dlg.Run()
-    
-    def menuObtainFileCmd(self,event):
-        "获取文件"
-        self.netconnect.ReqFileList()
-        
-    def menuIdentifiedCmd(self,event):
-        try:
-            import ChoseUserAndFileDialog
-            _dlg = ChoseUserAndFileDialog.ChoseUserAndFileDialog(self.netconnect)
-            _dlg.Run()
-        except:
-            wx.MessageBox("没有可以选择的文件","错误",wx.ICON_ERROR|wx.YES_DEFAULT)
+        else:
+            menuitem = parentMenu.Append(-1, label)
+            self.Bind(wx.EVT_MENU, getattr(self, "menu" + child + "Cmd"), menuitem) 
+            parentMenu.AppendSeparator()  
     
     def menuClearDisplayCmd(self,event):
         self.__showText.Clear()
-    
-    def menuDeleteMediaCmd(self,event):
-        import DeleteMediaDialog
-        _dlg = DeleteMediaDialog.DeleteMediaDialog()
-        _dlg.Run()
     
     def OnClose(self,event):
         self.Destroy()

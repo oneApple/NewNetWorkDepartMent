@@ -35,7 +35,6 @@ class RecvDhGenerateSuccess(MsgHandleInterface.MsgHandleInterface,object):
         import string
         session.elgamal = Elgamal.Elgamal(*[string.atol(str(s)) for s in _params])
         elgamal1 = session.elgamal.EncryptoList(Elgamal.StringToList(self.getAgroupSign(session)))
-        print elgamal1
         _cipher = self.getCipherText(session,[str(s) for s in _params])
         _plaintext = session.control.auditfilename + CommonData.MsgHandlec.PADDING + \
                      session.control.auditusername + CommonData.MsgHandlec.PADDING + \

@@ -95,15 +95,12 @@ class RecvHashElgamal12(MsgHandleInterface.MsgHandleInterface,object):
             showmsg = "结果：采样验证成功，该文件未被篡改"
         else:
             showmsg = "结果：采样验证失败，该文件被篡改,其中"
-        print session.difList,_groupborder
         for _dif in session.difList:
-            print _dif,_groupborder[_dif],_groupborder[_dif + 1]
             showmsg += "\n第" + str(_dif) + "组存在篡改，篡改帧区间为：" + str(_groupborder[_dif]) + "-" + str(_groupborder[_dif + 1]) +"帧"
         self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg)
     
     def HandleMsg(self,bufsize,session):
         recvbuffer = session.sockfd.recv(bufsize)
-        print recvbuffer
         _msglist = recvbuffer.split(CommonData.MsgHandlec.PADDING)
         if self.handleDhkeyAndAgroupParam(_msglist, session) == True:
             self.IdentifyResponsibility(session,string.atoi(_msglist[1]))
@@ -121,4 +118,3 @@ class RecvHashElgamal12(MsgHandleInterface.MsgHandleInterface,object):
         
 if __name__ == "__main__":
     import os
-    print os.getcwd()

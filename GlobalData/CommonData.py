@@ -28,13 +28,8 @@ class ViewPublisherc:
 class MainFramec:
     AUDITSERVER = 1001
     CONTENTSERVER = 2002
-    auditmenu = {"获取文件".decode("utf8"):"ObtainFile"}
-    usermenu = {"责任认定".decode("utf8"):"Identified"}
     toolmenu = {"清理屏幕".decode("utf8"):"ClearDisplay"}
-    mediamenu = {"删除文件".decode("utf8"):"DeleteMedia"}
-    menuMap = {"内容服务".decode("utf8"):auditmenu,"审核服务".decode("utf8"):usermenu,\
-               "工具":toolmenu,"文件管理":mediamenu}
-    disablemenu = {AUDITSERVER:"获取文件",CONTENTSERVER:"责任认定"}
+    menuMap = {"工具":toolmenu}
     
     
 class Rsac:

@@ -33,5 +33,6 @@ class RecvAllFile(MsgHandleInterface.MsgHandleInterface,object):
         session.sockfd.send(msghead)
         
         showmsg = "文件接收完毕:\n(1)文件名:" + session.filename + "\n(2)文件大小:" + str(session.currentbytes + bufsize)
+        showmsg += "\n等待文件验证..."
         self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg, True)
         session.currentbytes = 0

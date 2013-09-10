@@ -25,7 +25,6 @@ class NetConnect:
         _rke = RsaKeyExchange.RsaKeyExchange()
         _rke.GenerateRsaKey()
         _pkeystr = _rke.GetPubkeyStr("own")
-        print _pkeystr
         _msgbody = name + CommonData.MsgHandlec.PADDING + \
                    psw + CommonData.MsgHandlec.PADDING + \
                    _pkeystr
@@ -67,11 +66,9 @@ class NetConnect:
         "连接服务器并开启网络线程"
         try:
             import string
-            print address
             self.__Sockfd.connect((address[0],string.atoi(address[1])))
         except Exception,e:
             import wx
-            wx.MessageBox(e,"错误",wx.ICON_ERROR|wx.YES_DEFAULT)
             return MagicNum.NetConnectc.NOTCONNECT
         self.__netThread = NetThread.NetThread(self.__Sockfd.dup(),self,peername)
         self.__netThread.start()
@@ -85,4 +82,3 @@ class NetConnect:
 if __name__=='__main__':
     filename = "/home/keym/视频/小伙.mpg"
     _msgbody = filename[-filename[::-1].index("/"):].encode("utf-8")
-    print "msgbody",_msgbody,len(_msgbody)

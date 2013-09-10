@@ -49,7 +49,6 @@ class Elgamal:
     def __EncryptoList(self,stringlist):
         for string in stringlist:
             yield self.__elgamalobject.encrypt(string, self.__k)[1]
-            #print self.__elgamalobject.decrypt(self.__elgamalobject.encrypt(string, self.__k))
     def EncryptoList(self,stringlist):
         return list(self.__EncryptoList(stringlist))
 
@@ -60,19 +59,14 @@ if __name__ == '__main__':
     
     
     m1 = e2.EncryptoList(StringToList("89412eee21b23cd8cdbd3b4aa79728763fcf7f6f"))
-    #print m1
     s1 = e1.EncryptoList(m1)
     m2 = e1.EncryptoList(StringToList("89412eee21b23cd8cdbd3b4aa79728763fcf7f6f"))
-    print m2
     s2 = e2.EncryptoList(m2)
-    print CompareStringList(s1,s2)
     
     import struct
     
     fmt = GetStructFmt(m2)
-    print fmt
     s = struct.pack(fmt,*m2)
-    print struct.unpack(fmt,s)
     
     
     

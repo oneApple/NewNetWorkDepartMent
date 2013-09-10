@@ -23,7 +23,6 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
             self.__aparam = _plist[1:]
             return True
         else:
-            print session.sessionkey,_plist[0]
             return False
     
     def verifySign(self,sign,session):
@@ -99,7 +98,6 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
         else:
             showmsg = "结果：采样验证失败，该文件在传输过程中被篡改,其中"
         for _dif in difList:
-            print _dif,_groupborder[_dif],_groupborder[_dif + 1]
             showmsg += "\n第" + str(_dif) + "组存在篡改，篡改帧区间为：" + str(_groupborder[_dif]) + "-" + str(_groupborder[_dif + 1]) +"帧"
         self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg)
     
@@ -142,4 +140,3 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
         
 if __name__ == "__main__":
     import os
-    print os.getcwd()
