@@ -126,6 +126,7 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
                 msghead = self.packetMsg(MagicNum.MsgTypec.RECVMEDIASUCCESS,0)
                 session.sockfd.send(msghead)
                 showmsg = "收到采样结果:\n(1)A组参数：" + ",".join(self.__aparam) + "\n(2)A组采样签名：" + _msglist[1] + "\n(3)本地A组采样：" + self.__sampling
+                showmsg += "\n文件接收并验证成功"
                 self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg,True)
                 self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_REFRESHLOCALFILETABLE,"")
                 return

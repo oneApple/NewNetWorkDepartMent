@@ -41,17 +41,19 @@ class RecvDhGenerateSuccess(MsgHandleInterface.MsgHandleInterface,object):
                      Elgamal.GetStructFmt(elgamal1) + CommonData.MsgHandlec.PADDING + \
                      repr("".join(elgamal1))
         
-        showmsg = "A组签名的elgamal加密：\n(1)第一次加密:" + repr(",".join(elgamal1))
-        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg,True)
+        #showmsg = "A组签名的elgamal加密：\n(1)第一次加密:" + repr(",".join(elgamal1))
+        #self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg,True)
         return repr(_cipher) + CommonData.MsgHandlec.PADDING + _plaintext
     
     def HandleMsg(self,bufsize,session):
         if session.control.ThreadType == CommonData.ThreadType.CONNECTCP:
             self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,"开始接收文件(" + session.control.filename + ")")
-            msgbody = session.control.filename
+            msgbody = session.control.filename.encode("utf8")
             msghead = self.packetMsg(MagicNum.MsgTypec.REQFILEBUFFER, len(msgbody))
             session.sockfd.send(msghead + msgbody)
         elif session.control.ThreadType == CommonData.ThreadType.CONNECTAP:
-            _msgbody = self.packMsgBody(session)
+            _msgbody = self.packMsgBody(session).encode("utf8")
+            print _msgbody
+            print len(_msgbody)
             msghead = self.packetMsg(MagicNum.MsgTypec.SENDSIGNELGAMAL1, len(_msgbody))
             session.sockfd.send(msghead + _msgbody)

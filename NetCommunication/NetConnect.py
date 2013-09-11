@@ -36,6 +36,7 @@ class NetConnect:
         self.ThreadType = CommonData.ThreadType.CONNECTCP
         self.filename = filename 
         _msgbody = filename + CommonData.MsgHandlec.PADDING + username
+        _msgbody = _msgbody.encode("utf8")
         _msghead = struct.pack(CommonData.MsgHandlec.MSGHEADTYPE,MagicNum.MsgTypec.REQOBTAINFILE, len(_msgbody))
         self.__Sockfd.send(_msghead + _msgbody)
         
@@ -75,9 +76,10 @@ class NetConnect:
         
     def StopNetConnect(self):
         "发送关闭消息并关闭网络线程"
-        #self.__netThread.join()
+        _msghead = struct.pack(CommonData.MsgHandlec.MSGHEADTYPE,MagicNum.MsgTypec.REQCLOSEMSG, 0)
+        self.__Sockfd.send(_msghead)
+        self.__netThread.stop()
         #放在主线程主执行
-        pass
         
 if __name__=='__main__':
     filename = "/home/keym/视频/小伙.mpg"

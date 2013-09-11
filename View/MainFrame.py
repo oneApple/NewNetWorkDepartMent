@@ -32,15 +32,25 @@ class MyFrame(wx.Frame):
         self.createHeadStaticText(text = "CopyRight@CUC 2013")
         #self.__vbox_top.Add(wx.StaticLine(self.__panel_top), 0, wx.EXPAND|wx.ALL, 5)
         self.__panel_top.SetSizer(self.__vbox_top)
-        
+        self.Bind(wx.EVT_CLOSE, self.OnCloseWindow) 
         self.registerPublisher()
         
         self.__gridNetCurPos = -1
         self.__gridLocalCurPos = -1
         self.__showTextColor = True
+        self.__contentList = []
         
         self.netconnect = netconnect
         self.netconnect.ReqFileList()
+    
+    def OnCloseWindow(self,evt):
+        print "close"
+        self.Destroy()
+        self.netconnect.StopNetConnect()
+        for content in self.__contentList:
+            content.StopNetConnect()
+        import sys
+        sys.exit()
     
     def createPanel(self,outpanel,color = "mistyrose"):
         _panel = wx.Panel(outpanel,-1)
@@ -114,7 +124,7 @@ class MyFrame(wx.Frame):
             for filename in _filenameList:
                 _db = MediaTable.MediaTable()
                 _db.Connect()
-                _res = _db.searchMedia(filename, owner)
+                _res = _db.searchMedia(filename.decode("utf8"), owner)
                 _db.CloseCon()
                 status = "未审核"
                 if _res == []:
@@ -200,7 +210,7 @@ class MyFrame(wx.Frame):
         
         _filename = self.__netFileTable.GetCellValue(self.__gridNetCurPos,0)
         _contentSocket.ReqFile(_filename,self.username)
-        
+        self.__contentList.append(_contentSocket)
         return
     
     def createLeft3Button(self,panel,vbox):

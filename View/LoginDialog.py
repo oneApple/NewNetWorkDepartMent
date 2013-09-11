@@ -37,7 +37,9 @@ class LoginDialog(ValidaDialog.ValidaDialog,object):
         return _text
     
     def SwitchView(self,msg):
+        print msg
         _inputlist = self.getInputText()
+        print _inputlist
         _mainFrame = MainFrame.MyFrame(self.__type,self.__netconnect,msg.data +[_inputlist[0],])
         _mainFrame.Run()
         self.Hide()
