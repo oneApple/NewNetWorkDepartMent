@@ -124,7 +124,7 @@ class MyFrame(wx.Frame):
             for filename in _filenameList:
                 _db = MediaTable.MediaTable()
                 _db.Connect()
-                _res = _db.searchMedia(filename.decode("utf8"), owner)
+                _res = _db.searchMedia(filename, owner)
                 _db.CloseCon()
                 status = "未审核"
                 if _res == []:

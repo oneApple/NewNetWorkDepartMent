@@ -25,15 +25,15 @@ class MediaTable(DataBaseInterface.DataBaseInterface,object):
     def AlterMedia(self,attri,value,medianame,username):
         "更改媒体表"
         _sql = "UPDATE MediaTable SET "+ attri +"=? where medianame=? and username=?"
-        self.ExcuteCmd(_sql,[value,medianame,username])
+        self.ExcuteCmd(_sql,[value,medianame.decode("utf8"),username.decode("utf8")])
     
     def searchMedia(self,medianame,username):
         _sql = "SELECT * FROM MediaTable where medianame=? and username=?"
-        return self.Search(_sql, [medianame,username])
+        return self.Search(_sql, [medianame.decode("utf8"),username.decode("utf8")])
     
     def deleteMedia(self,medianame,username):
         _sql = "DELETE FROM MediaTable WHERE medianame=? and username=?"
-        self.ExcuteCmd(_sql, [medianame,username])  
+        self.ExcuteCmd(_sql, [medianame.decode("utf8"),username.decode("utf8")])  
     
     def deleteTable(self):
         _sql = "DROP TABLE MediaTable"

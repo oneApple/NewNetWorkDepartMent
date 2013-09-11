@@ -65,7 +65,7 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
     def addMediaToTable(self,session,sign,hash):
         "添加到数据库"
         _db = MediaTable.MediaTable()
-        _value = [session.filename.decode("utf-8"),session.peername,CommonData.MsgHandlec.PADDING.join(self.__aparam),sign,hash]
+        _value = [session.filename.decode("utf-8"),session.peername.decode("utf8"),CommonData.MsgHandlec.PADDING.join(self.__aparam),sign,hash]
         _db.Connect()
         _db.AddNewMedia(_value)
         _db.CloseCon()         
