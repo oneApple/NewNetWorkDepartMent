@@ -46,9 +46,12 @@ class MyFrame(wx.Frame):
     def OnCloseWindow(self,evt):
         print "close"
         self.Destroy()
-        self.netconnect.StopNetConnect()
-        for content in self.__contentList:
-            content.StopNetConnect()
+        try:
+            self.netconnect.StopNetConnect()
+            for content in self.__contentList:
+                content.StopNetConnect()
+        except:
+            pass
         import sys
         sys.exit()
     
@@ -159,7 +162,7 @@ class MyFrame(wx.Frame):
         "文件列表"
         _panel = self.createPanel(panel)
         _grid = wx.grid.Grid(_panel)
-        table = MatrixTable.MatrixTable(self.getLocalFileList(),["文件名","所有者","状态"],[i for i in range(3)])
+        table = MatrixTable.MatrixTable(self.getLocalFileList(),["文件名","所有者"],[i for i in range(3)])
         _grid.SetTable(table, True)
         _grid.SetRowLabelSize(30)
         self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.evtGridRowLabelLeftClick)
