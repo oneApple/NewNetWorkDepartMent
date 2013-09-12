@@ -95,7 +95,7 @@ class MyFrame(wx.Frame):
     def refreshNetFileList(self,recvmsg):
         "更新文件列表"
         _filelist = recvmsg.data
-        _m = MatrixTable.MatrixTable(_filelist,["文件名","所有者","状态"],[i for i in range(len(_filelist))])
+        _m = MatrixTable.MatrixTable(_filelist,["文件名","所有者"],[i for i in range(len(_filelist))])
         self.__netFileTable.ClearGrid()#清空表格
         self.__netFileTable.SetTable(_m)
         self.__netFileTable.Hide()
@@ -104,7 +104,7 @@ class MyFrame(wx.Frame):
     def refreshLocalFileList(self,recvmsg = ""):
         "更新文件列表"
         _filelist = self.getLocalFileList()
-        _m = MatrixTable.MatrixTable(_filelist,["文件名","所有者","状态"],[i for i in range(len(_filelist))])
+        _m = MatrixTable.MatrixTable(_filelist,["文件名","所有者"],[i for i in range(len(_filelist))])
         self.__localFileTable.ClearGrid()#清空表格
         self.__localFileTable.SetTable(_m)
         self.__localFileTable.Hide()
@@ -117,22 +117,15 @@ class MyFrame(wx.Frame):
         _mediaPath = _cfg.GetMediaPath()
         if not os.path.exists(_mediaPath):
             os.mkdir(_mediaPath)
-        _userDirList = os.listdir(_mediaPath)  
         
-        for owner in _userDirList:
-            _filenameList = os.listdir(_mediaPath + "/" + owner)
-            for filename in _filenameList:
-                _db = MediaTable.MediaTable()
-                _db.Connect()
-                _res = _db.searchMedia(filename, owner)
-                _db.CloseCon()
-                status = "未审核"
-                if _res == []:
-                    break
-                if _res[0][5] == MagicNum.MediaTablec.AUDIT:
-                    status = "已审核"
-                _singleFile = [filename,owner,status]
-                _filelist.append(_singleFile)
+        _db = MediaTable.MediaTable()
+        _db.Connect()
+        _res = _db.Search("select * from MediaTable")
+        _db.CloseCon()
+        
+        for index in range(len(_res)):
+            _singleFile = [_res[index][0], _res[index][1]]
+            _filelist.append(_singleFile)
             
         return _filelist
     
@@ -168,7 +161,7 @@ class MyFrame(wx.Frame):
         _grid = wx.grid.Grid(_panel)
         table = MatrixTable.MatrixTable(self.getLocalFileList(),["文件名","所有者","状态"],[i for i in range(3)])
         _grid.SetTable(table, True)
-        _grid.SetRowLabelSize(15)
+        _grid.SetRowLabelSize(30)
         self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.evtGridRowLabelLeftClick)
         
         self.createBox([_grid,], _panel, vbox, label,partition = 2)

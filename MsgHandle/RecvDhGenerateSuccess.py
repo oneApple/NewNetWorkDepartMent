@@ -53,7 +53,5 @@ class RecvDhGenerateSuccess(MsgHandleInterface.MsgHandleInterface,object):
             session.sockfd.send(msghead + msgbody)
         elif session.control.ThreadType == CommonData.ThreadType.CONNECTAP:
             _msgbody = self.packMsgBody(session).encode("utf8")
-            print _msgbody
-            print len(_msgbody)
             msghead = self.packetMsg(MagicNum.MsgTypec.SENDSIGNELGAMAL1, len(_msgbody))
             session.sockfd.send(msghead + _msgbody)
