@@ -43,7 +43,6 @@ if __name__=='__main__':
     a = MediaTable()
     a.Connect()
     #a.deleteMedia("视频源.mpg".decode("utf8"), "cp")
-    print a.Search("select * from MediaTable")
     a.CloseCon()
     #a.deleteTable()
     #a.CreateTable()

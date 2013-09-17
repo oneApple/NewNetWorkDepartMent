@@ -1,6 +1,6 @@
 #coding=utf-8
 _metaclass_ = type
-import string
+import string, struct
 from NetCommunication import NetSocketFun
 from MsgHandle import MsgHandleInterface
 from GlobalData import CommonData, MagicNum, ConfigData
@@ -129,6 +129,9 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
                 showmsg += "\n文件接收并验证成功"
                 self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg,True)
                 self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_REFRESHLOCALFILETABLE,"")
+                _msghead = self.packetMsg(MagicNum.MsgTypec.REQCLOSEMSG, 0)
+                NetSocketFun.NetSocketSend(session.sockfd,_msghead)
+                session.stop()
                 return
             else:
                 _diflist = self.compareSamplingHash(_msglist[2:])

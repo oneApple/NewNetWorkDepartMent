@@ -44,7 +44,6 @@ class MyFrame(wx.Frame):
         self.netconnect.ReqFileList()
     
     def OnCloseWindow(self,evt):
-        print "close"
         self.Destroy()
         try:
             self.netconnect.StopNetConnect()
