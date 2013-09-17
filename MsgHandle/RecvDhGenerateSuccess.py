@@ -47,7 +47,7 @@ class RecvDhGenerateSuccess(MsgHandleInterface.MsgHandleInterface,object):
     
     def HandleMsg(self,bufsize,session):
         if session.control.ThreadType == CommonData.ThreadType.CONNECTCP:
-            self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,"开始接收文件(" + session.control.filename + ")")
+            self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,"开始接收文件(" + session.control.filename + ")...")
             msgbody = session.control.filename.encode("utf8")
             msghead = self.packetMsg(MagicNum.MsgTypec.REQFILEBUFFER, len(msgbody))
             NetSocketFun.NetSocketSend(session.sockfd,msghead + msgbody)

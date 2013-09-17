@@ -20,7 +20,7 @@ class NetThread(threading.Thread):
         _MsgHandleMap = MsgHandleMap.MsgHandleMap()
         while self.runflag:
             recvbuffer = self.sockfd.recv(struct.calcsize(CommonData.MsgHandlec.MSGHEADTYPE))
-            if(len(recvbuffer) != struct.calcsize(CommonData.MsgHandlec.MSGHEADTYPE)):
+            if len(recvbuffer) == 0 or (len(recvbuffer) != struct.calcsize(CommonData.MsgHandlec.MSGHEADTYPE)):
                 break            
             recvmsghead = struct.unpack(CommonData.MsgHandlec.MSGHEADTYPE,recvbuffer)
             _MsgHandleMap.getMsgHandle(recvmsghead[0]).HandleMsg(recvmsghead[1],self)
