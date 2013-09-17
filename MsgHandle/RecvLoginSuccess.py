@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 _metaclass_ = type
 from MsgHandle import MsgHandleInterface
+from NetCommunication import NetSocketFun
 from GlobalData import CommonData
 
 #from wx.lib.pubsub  import Publisher
@@ -12,7 +13,7 @@ class RecvLoginSuccess(MsgHandleInterface.MsgHandleInterface,object):
         super(RecvLoginSuccess,self).__init__()
     
     def HandleMsg(self,bufsize,session):
-        recvbuffer = session.sockfd.recv(bufsize)
+        recvbuffer = NetSocketFun.NetSocketRecv(session.sockfd,bufsize)
         recvbuffer = eval(recvbuffer)
         print recvbuffer                                                                                       
         recvlist = recvbuffer.split(CommonData.MsgHandlec.PADDING)

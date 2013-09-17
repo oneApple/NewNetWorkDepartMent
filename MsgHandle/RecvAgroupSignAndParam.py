@@ -1,7 +1,7 @@
 #coding=utf-8
 _metaclass_ = type
 import string
-
+from NetCommunication import NetSocketFun
 from MsgHandle import MsgHandleInterface
 from GlobalData import CommonData, MagicNum, ConfigData
 from DataBase import MediaTable
@@ -115,7 +115,7 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
             os.rmdir(root)  
     
     def HandleMsg(self,bufsize,session):
-        recvbuffer = session.sockfd.recv(bufsize)
+        recvbuffer = NetSocketFun.NetSocketRecv(session.sockfd,bufsize)
         _msglist = recvbuffer.split(CommonData.MsgHandlec.PADDING)
         if self.handleDhkeyAndAgroupParam(_msglist[0], session) == True:
             self.samplingAgroup(session)
@@ -124,7 +124,7 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
                 self.compareSamplingHash(_msglist[2:])
                 self.addMediaToTable(session,_msglist[1],CommonData.MsgHandlec.PADDING.join(_msglist[2:]))
                 msghead = self.packetMsg(MagicNum.MsgTypec.RECVMEDIASUCCESS,0)
-                session.sockfd.send(msghead)
+                NetSocketFun.NetSocketSend(session.sockfd,msghead)
                 showmsg = "收到采样结果:\n(1)A组参数：" + ",".join(self.__aparam) + "\n(2)A组采样签名：" + _msglist[1] + "\n(3)本地A组采样：" + self.__sampling
                 showmsg += "\n文件接收并验证成功"
                 self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg,True)
@@ -137,7 +137,7 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
             showmsg = "会话密钥验证失败,发送方为恶意用户"
         self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg, True)
         msghead = self.packetMsg(MagicNum.MsgTypec.IDENTITYVERIFYFAILED,0)
-        session.sockfd.send(msghead)
+        NetSocketFun.NetSocketSend(session.sockfd,msghead)
         
 if __name__ == "__main__":
     import os

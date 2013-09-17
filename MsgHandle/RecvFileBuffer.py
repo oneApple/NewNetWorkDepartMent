@@ -1,6 +1,7 @@
 _metaclass_ = type
 
 from MsgHandle import MsgHandleInterface
+from NetCommunication import NetSocketFun
 from GlobalData import MagicNum, ConfigData
 
 class RecvFileBuffer(MsgHandleInterface.MsgHandleInterface,object):
@@ -23,8 +24,8 @@ class RecvFileBuffer(MsgHandleInterface.MsgHandleInterface,object):
     def HandleMsg(self,bufsize,session):
         if session.currentbytes == 0:
             self.createMediaDir(session)
-        recvbuffer = session.sockfd.recv(bufsize)
+        recvbuffer = NetSocketFun.NetSocketRecv(session.sockfd,bufsize)
         session.currentbytes += len(recvbuffer)
         session.file.write(recvbuffer)
         msghead = self.packetMsg(MagicNum.MsgTypec.REQFILEBUFFER, 0)
-        session.sockfd.send(msghead)
+        NetSocketFun.NetSocketSend(session.sockfd,msghead)

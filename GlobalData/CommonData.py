@@ -5,7 +5,7 @@ class MsgHandlec:
     PADDING = "###"
     ELGAMALPAD = "######"
     SPARATE = "~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~\n"
-    FILEBLOCKSIZE = 1024
+    FILEBLOCKSIZE = 10240
 
 class ThreadType:
     CONNECTAP = 10001

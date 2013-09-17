@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 
 _metaclass_ = type
+from NetCommunication import NetSocketFun
 
 from MsgHandle import MsgHandleInterface
 from GlobalData import MagicNum,ConfigData, CommonData
@@ -26,11 +27,11 @@ class RecvAllFile(MsgHandleInterface.MsgHandleInterface,object):
         "接收所有文件，请求A组参数"
         if session.currentbytes == 0:
             self.createMediaDir(session)
-        recvbuffer = session.sockfd.recv(bufsize)
+        recvbuffer = NetSocketFun.NetSocketRecv(session.sockfd,bufsize)
         session.file.write(recvbuffer)
         session.file.close()
         msghead = self.packetMsg(MagicNum.MsgTypec.REQAGROUP, 0)
-        session.sockfd.send(msghead)
+        NetSocketFun.NetSocketSend(session.sockfd,msghead)
         
         showmsg = "文件接收完毕:\n(1)文件名:" + session.filename + "\n(2)文件大小:" + str(session.currentbytes + bufsize)
         showmsg += "\n等待文件验证..."

@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 
 _metaclass_ = type
-
+from NetCommunication import NetSocketFun
 from MsgHandle import MsgHandleInterface
 from GlobalData import MagicNum, CommonData, ConfigData
 from CryptoAlgorithms import Elgamal, Rsa, HashBySha1
@@ -50,8 +50,8 @@ class RecvDhGenerateSuccess(MsgHandleInterface.MsgHandleInterface,object):
             self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,"开始接收文件(" + session.control.filename + ")")
             msgbody = session.control.filename.encode("utf8")
             msghead = self.packetMsg(MagicNum.MsgTypec.REQFILEBUFFER, len(msgbody))
-            session.sockfd.send(msghead + msgbody)
+            NetSocketFun.NetSocketSend(session.sockfd,msghead + msgbody)
         elif session.control.ThreadType == CommonData.ThreadType.CONNECTAP:
             _msgbody = self.packMsgBody(session).encode("utf8")
             msghead = self.packetMsg(MagicNum.MsgTypec.SENDSIGNELGAMAL1, len(_msgbody))
-            session.sockfd.send(msghead + _msgbody)
+            NetSocketFun.NetSocketSend(session.sockfd,msghead + _msgbody)

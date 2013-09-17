@@ -4,7 +4,7 @@ import socket, struct
 import NetThread
 from CryptoAlgorithms import RsaKeyExchange, DiffieHellman
 from GlobalData import CommonData, ConfigData, MagicNum
-
+from NetCommunication import NetSocketFun
 
 _metaclass_ = type
 class NetConnect:
@@ -18,7 +18,7 @@ class NetConnect:
         "请求登录"
         _msgbody = name + CommonData.MsgHandlec.PADDING + psw
         _msghead = struct.pack(CommonData.MsgHandlec.MSGHEADTYPE,MagicNum.MsgTypec.REQLOGINMSG,len(_msgbody))
-        self.__Sockfd.send(_msghead + _msgbody)
+        NetSocketFun.NetSocketSend(self.__Sockfd,_msghead + _msgbody)
     
     def ReqRegister(self,name,psw):
         "请求注册"
@@ -29,7 +29,7 @@ class NetConnect:
                    psw + CommonData.MsgHandlec.PADDING + \
                    _pkeystr
         _msghead = struct.pack(CommonData.MsgHandlec.MSGHEADTYPE,MagicNum.MsgTypec.REQREGISTERMSG,len(_msgbody))
-        self.__Sockfd.send(_msghead + _msgbody.decode('gbk').encode("utf-8"))
+        NetSocketFun.NetSocketSend(self.__Sockfd,_msghead + _msgbody.decode('gbk').encode("utf-8"))
         
     def ReqFile(self,filename,username):
         "请求分发文件" 
@@ -38,7 +38,7 @@ class NetConnect:
         _msgbody = filename + CommonData.MsgHandlec.PADDING + username
         _msgbody = _msgbody.encode("utf8")
         _msghead = struct.pack(CommonData.MsgHandlec.MSGHEADTYPE,MagicNum.MsgTypec.REQOBTAINFILE, len(_msgbody))
-        self.__Sockfd.send(_msghead + _msgbody)
+        NetSocketFun.NetSocketSend(self.__Sockfd,_msghead + _msgbody)
         
         import wx
         from wx.lib.pubsub  import Publisher
@@ -51,7 +51,7 @@ class NetConnect:
         self.auditfilename = filename
         #_msgbody = username + CommonData.MsgHandlec.PADDING + filename
         _msghead = struct.pack(CommonData.MsgHandlec.MSGHEADTYPE,MagicNum.MsgTypec.REQIDENTIFIED, 0)
-        self.__Sockfd.send(_msghead)
+        NetSocketFun.NetSocketSend(self.__Sockfd,_msghead)
         
         import wx
         from wx.lib.pubsub  import Publisher
@@ -61,7 +61,7 @@ class NetConnect:
     def ReqFileList(self):
         "请求文件列表"
         _msghead = struct.pack(CommonData.MsgHandlec.MSGHEADTYPE,MagicNum.MsgTypec.REQFILELIST, 0)
-        self.__Sockfd.send(_msghead)
+        NetSocketFun.NetSocketSend(self.__Sockfd,_msghead)
         
     def StartNetConnect(self,address,peername = "auditserver"):
         "连接服务器并开启网络线程"
@@ -77,7 +77,7 @@ class NetConnect:
     def StopNetConnect(self):
         "发送关闭消息并关闭网络线程"
         _msghead = struct.pack(CommonData.MsgHandlec.MSGHEADTYPE,MagicNum.MsgTypec.REQCLOSEMSG, 0)
-        self.__Sockfd.send(_msghead)
+        NetSocketFun.NetSocketSend(self.__Sockfd,_msghead)
         self.__netThread.stop()
         #放在主线程主执行
         

@@ -1,6 +1,7 @@
 #coding=utf-8
 _metaclass_ = type
 import string
+from NetCommunication import NetSocketFun
 
 from MsgHandle import MsgHandleInterface
 from GlobalData import CommonData, MagicNum, ConfigData
@@ -58,7 +59,7 @@ class RecvHashElgamal12(MsgHandleInterface.MsgHandleInterface,object):
         #self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg)
         _msgbody = _cipher + CommonData.MsgHandlec.PADDING + _plaintext
         _msghead = self.packetMsg(MagicNum.MsgTypec.SENDHASHELGAMAL1, len(_msgbody))
-        session.sockfd.send(_msghead + _msgbody)
+        NetSocketFun.NetSocketSend(session.sockfd,_msghead + _msgbody)
     
     
     def IdentifyResponsibility(self,session,index):
@@ -100,7 +101,7 @@ class RecvHashElgamal12(MsgHandleInterface.MsgHandleInterface,object):
         self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg)
     
     def HandleMsg(self,bufsize,session):
-        recvbuffer = session.sockfd.recv(bufsize)
+        recvbuffer = NetSocketFun.NetSocketRecv(session.sockfd,bufsize)
         _msglist = recvbuffer.split(CommonData.MsgHandlec.PADDING)
         if self.handleDhkeyAndAgroupParam(_msglist, session) == True:
             self.IdentifyResponsibility(session,string.atoi(_msglist[1]))
@@ -114,7 +115,7 @@ class RecvHashElgamal12(MsgHandleInterface.MsgHandleInterface,object):
             showmsg = "签名验证失败,发送方为恶意用户"
             self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg)
         msghead = self.packetMsg(MagicNum.MsgTypec.IDENTITYVERIFYFAILED,0)
-        session.sockfd.send(msghead)
+        NetSocketFun.NetSocketSend(session.sockfd,msghead)
         
 if __name__ == "__main__":
     import os

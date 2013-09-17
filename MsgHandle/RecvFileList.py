@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 _metaclass_ = type
 from wx.lib.pubsub  import Publisher
+from NetCommunication import NetSocketFun
 import wx
 
 from MsgHandle import MsgHandleInterface
@@ -11,7 +12,7 @@ class RecvFileList(MsgHandleInterface.MsgHandleInterface,object):
         super(RecvFileList,self).__init__()
     
     def HandleMsg(self,bufsize,session):
-        recvbuffer = session.sockfd.recv(bufsize)
+        recvbuffer = NetSocketFun.NetSocketRecv(session.sockfd,bufsize)
         _fileList = recvbuffer.split(CommonData.MsgHandlec.PADDING) 
         table = []
         for index in range(len(_fileList) / 2):
