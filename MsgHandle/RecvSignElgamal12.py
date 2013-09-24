@@ -2,7 +2,6 @@
 _metaclass_ = type
 import string
 from NetCommunication import NetSocketFun
-
 from MsgHandle import MsgHandleInterface
 from GlobalData import CommonData, MagicNum, ConfigData
 from DataBase import MediaTable
@@ -23,7 +22,7 @@ class RecvSignElgamal12(MsgHandleInterface.MsgHandleInterface,object):
         session.audituser = session.control.auditusername
         _res = _db.searchMedia(session.auditfile,session.audituser)
         _db.CloseCon()
-        self.__aparam = _res[0][2].split(CommonData.MsgHandlec.PADDING)
+        self.__aparam = NetSocketFun.NetUnPackMsgBody(_res[0][2])
         self.__Noasign = _res[0][3]
         self.__NoaHash = _res[0][4]
     
@@ -79,14 +78,14 @@ class RecvSignElgamal12(MsgHandleInterface.MsgHandleInterface,object):
         showmsg = "Ａ组采样过程:"
         self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg, True)
         _gvs = GetVideoSampling.GetVideoSampling(_filename,*_aparam)
-        self.__sampling = CommonData.MsgHandlec.PADDING.join(_gvs.GetSampling())       
+        self.__sampling = NetSocketFun.NetPackMsgBody(_gvs.GetSampling())       
     
     def compareSamplingHash(self,localhash,recvhash):
         "分组验证"
         self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, "分组进行比对:", True)
         difList = []
-        localhash = localhash.split(CommonData.MsgHandlec.PADDING)
-        recvlist = recvhash.split(CommonData.MsgHandlec.PADDING)
+        localhash = NetSocketFun.NetUnPackMsgBody(localhash)
+        recvlist = NetSocketFun.NetUnPackMsgBody(recvhash)
         for i in range(len(recvlist)):
             try:
                 if localhash[i] != recvlist[i]:
@@ -116,7 +115,7 @@ class RecvSignElgamal12(MsgHandleInterface.MsgHandleInterface,object):
     def getCipherText(self,session,params):
         _cfg = ConfigData.ConfigData()
         _rsa = Rsa.Rsa(_cfg.GetKeyPath())
-        plaintext = session.sessionkey + CommonData.MsgHandlec.PADDING + CommonData.MsgHandlec.PADDING.join(params)
+        plaintext = NetSocketFun.NetPackMsgBody([ session.sessionkey ] + params)
         return _rsa.EncryptByPubkey(plaintext, session.peername)
     
     def sendHashELgamal(self,session):
@@ -124,14 +123,13 @@ class RecvSignElgamal12(MsgHandleInterface.MsgHandleInterface,object):
         session.difList = []
         _params = Elgamal.GetElgamalParamqp()
         session.elgamal = Elgamal.Elgamal(*[string.atol(str(s)) for s in _params])
-        elgamal1 = session.elgamal.EncryptoList(Elgamal.StringToList(self.__NoaHash.split(CommonData.MsgHandlec.PADDING)[0].encode("ascii")))
+        elgamal1 = session.elgamal.EncryptoList(Elgamal.StringToList(NetSocketFun.NetUnPackMsgBody(self.__NoaHash)[0].encode("ascii")))
         _cipher = self.getCipherText(session,[str(s) for s in _params])
-        _plaintext = str(0) + CommonData.MsgHandlec.PADDING + \
-                     Elgamal.GetStructFmt(elgamal1) + CommonData.MsgHandlec.PADDING + \
-                     "".join(elgamal1)
+        _plaintext = [str(0),Elgamal.GetStructFmt(elgamal1),"".join(elgamal1)]
         #showmsg = "A组采样的elgamal加密:\n(1)组号：" + str(0) + "\n(2)第一次加密结果:" + ",".join(elgamal1)
         #self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg.decode("ascii").encode("ascii"))
-        _msgbody = _cipher + CommonData.MsgHandlec.PADDING + _plaintext
+        msglist = [_cipher] + _plaintext
+        _msgbody = NetSocketFun.NetPackMsgBody(msglist)
         _msghead = self.packetMsg(MagicNum.MsgTypec.SENDHASHELGAMAL1, len(_msgbody))
         NetSocketFun.NetSocketSend(session.sockfd,_msghead + _msgbody)
     
@@ -157,16 +155,19 @@ class RecvSignElgamal12(MsgHandleInterface.MsgHandleInterface,object):
         _cfg = ConfigData.ConfigData()
         _mediapath = _cfg.GetYVectorFilePath()
         _media = _mediapath + "out.ts" 
-        os.remove(_media)
-        _dir = _mediapath + session.filename[:session.filename.index(".")]
-        for root, dirs, files in os.walk(_dir, topdown=False):
-            for name in files:
-                os.remove(os.path.join(root, name))
-            os.rmdir(root)  
+        try:
+            os.remove(_media)
+            _dir = _mediapath + session.filename[:session.filename.index(".")]
+            for root, dirs, files in os.walk(_dir, topdown=False):
+                for name in files:
+                    os.remove(os.path.join(root, name))
+                os.rmdir(root) 
+        except:
+            pass 
     
     def HandleMsg(self,bufsize,session):
         recvbuffer = NetSocketFun.NetSocketRecv(session.sockfd,bufsize)
-        _msglist = recvbuffer.split(CommonData.MsgHandlec.PADDING)
+        _msglist = NetSocketFun.NetUnPackMsgBody(recvbuffer)
         if self.handleDhkeyAndAgroupParam(_msglist, session) == True:
             self.samplingAgroup(session)
             self.deltempFile(session)
@@ -180,3 +181,11 @@ class RecvSignElgamal12(MsgHandleInterface.MsgHandleInterface,object):
         
 if __name__ == "__main__":
     import os
+    
+    
+    
+    
+    
+    
+    
+    

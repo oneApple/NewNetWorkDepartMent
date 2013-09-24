@@ -34,7 +34,7 @@ class RecvHashElgamal12(MsgHandleInterface.MsgHandleInterface,object):
         _res = _db.searchMedia(session.auditfile,session.audituser)
         _db.CloseCon()
         _hbs = HashBySha1.HashBySha1()
-        _hashlist = _res[0][4].split(CommonData.MsgHandlec.PADDING)
+        _hashlist = NetSocketFun.NetUnPackMsgBody(_res[0][4])
         if self.__index >= len(_hashlist):
             return ""
         else:
@@ -44,7 +44,8 @@ class RecvHashElgamal12(MsgHandleInterface.MsgHandleInterface,object):
         "对参数和会话密钥进行加密"
         _cfg = ConfigData.ConfigData()
         _rsa = Rsa.Rsa(_cfg.GetKeyPath())
-        plaintext = session.sessionkey + CommonData.MsgHandlec.PADDING + CommonData.MsgHandlec.PADDING.join(params)
+        msglist = [session.sessionkey ] + params
+        plaintext = NetSocketFun.NetPackMsgBody(msglist)
         return _rsa.EncryptByPubkey(plaintext, session.peername)
     
     def sendHashELgamal(self,session,hash):
@@ -53,11 +54,10 @@ class RecvHashElgamal12(MsgHandleInterface.MsgHandleInterface,object):
         session.elgamal = Elgamal.Elgamal(*[string.atol(str(s)) for s in _params])
         elgamal1 = session.elgamal.EncryptoList(Elgamal.StringToList(hash))
         _cipher = self.getCipherText(session,[str(s) for s in _params])
-        _plaintext = str(self.__index) + CommonData.MsgHandlec.PADDING + \
-                     Elgamal.GetStructFmt(elgamal1) + CommonData.MsgHandlec.PADDING + \
-                     "".join(elgamal1)
+        _plaintext = [str(self.__index),Elgamal.GetStructFmt(elgamal1),"".join(elgamal1)]
         #self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg)
-        _msgbody = _cipher + CommonData.MsgHandlec.PADDING + _plaintext
+        msglist = [_cipher] + _plaintext
+        _msgbody = NetSocketFun.NetPackMsgBody(msglist)
         _msghead = self.packetMsg(MagicNum.MsgTypec.SENDHASHELGAMAL1, len(_msgbody))
         NetSocketFun.NetSocketSend(session.sockfd,_msghead + _msgbody)
     
@@ -82,7 +82,7 @@ class RecvHashElgamal12(MsgHandleInterface.MsgHandleInterface,object):
         session.audituser = session.control.auditusername
         _res = _db.searchMedia(session.auditfile,session.audituser)
         _db.CloseCon()
-        self.__aparam = _res[0][2].split(CommonData.MsgHandlec.PADDING)
+        self.__aparam = NetSocketFun.NetUnPackMsgBody(_res[0][2])
     
     def showresult(self,session):
         import string
@@ -102,7 +102,7 @@ class RecvHashElgamal12(MsgHandleInterface.MsgHandleInterface,object):
     
     def HandleMsg(self,bufsize,session):
         recvbuffer = NetSocketFun.NetSocketRecv(session.sockfd,bufsize)
-        _msglist = recvbuffer.split(CommonData.MsgHandlec.PADDING)
+        _msglist = NetSocketFun.NetUnPackMsgBody(recvbuffer)
         if self.handleDhkeyAndAgroupParam(_msglist, session) == True:
             self.IdentifyResponsibility(session,string.atoi(_msglist[1]))
             _ahash = self.getAgroupHash(session)

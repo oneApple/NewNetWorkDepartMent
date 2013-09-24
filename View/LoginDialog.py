@@ -6,7 +6,7 @@ import ValidaDialog
 import RegisterDialog
 import MainFrame
 from GlobalData import MagicNum, CommonData, ConfigData
-from NetCommunication import NetConnect
+from NetCommunication import NetConnect, NetSocketFun
 
 class LoginDialog(ValidaDialog.ValidaDialog,object):
     def __init__(self,netconnect,type):
@@ -38,14 +38,14 @@ class LoginDialog(ValidaDialog.ValidaDialog,object):
     
     def SwitchView(self,msg):
         _inputlist = self.getInputText()
-        _mainFrame = MainFrame.MyFrame(self.__type,self.__netconnect,msg.data +[_inputlist[0],])
+        _mainFrame = MainFrame.MyFrame(self.__type,self.__netconnect,msg.data +(_inputlist[0],))
         _mainFrame.Run()
         self.Hide()
     
     def secondButtonFun(self):
         _inputlist = self.getInputText()
         if self.__type == CommonData.MainFramec.AUDITSERVER:
-            _inputlist[0] = MagicNum.UserTypec.NOUSER + CommonData.MsgHandlec.PADDING + _inputlist[0]
+            _inputlist[0] = [MagicNum.UserTypec.NOUSER , _inputlist[0]]
         self.__netconnect.ReqConnect(_inputlist[0], _inputlist[1])
             
     def registerButtonFun(self,event):

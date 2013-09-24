@@ -16,7 +16,8 @@ class NetConnect:
         
     def ReqConnect(self,name,psw):
         "请求登录"
-        _msgbody = name + CommonData.MsgHandlec.PADDING + psw
+        msglist = name + [psw]
+        _msgbody = NetSocketFun.NetPackMsgBody(msglist)
         _msghead = struct.pack(CommonData.MsgHandlec.MSGHEADTYPE,MagicNum.MsgTypec.REQLOGINMSG,len(_msgbody))
         NetSocketFun.NetSocketSend(self.__Sockfd,_msghead + _msgbody)
     
@@ -25,18 +26,17 @@ class NetConnect:
         _rke = RsaKeyExchange.RsaKeyExchange()
         _rke.GenerateRsaKey()
         _pkeystr = _rke.GetPubkeyStr("own")
-        _msgbody = name + CommonData.MsgHandlec.PADDING + \
-                   psw + CommonData.MsgHandlec.PADDING + \
-                   _pkeystr
+        msglist = [name,psw,_pkeystr]
+        _msgbody = NetSocketFun.NetPackMsgBody(msglist)
         _msghead = struct.pack(CommonData.MsgHandlec.MSGHEADTYPE,MagicNum.MsgTypec.REQREGISTERMSG,len(_msgbody))
         NetSocketFun.NetSocketSend(self.__Sockfd,_msghead + _msgbody.decode('gbk').encode("utf-8"))
         
     def ReqFile(self,filename,username):
         "请求分发文件" 
         self.ThreadType = CommonData.ThreadType.CONNECTCP
-        self.filename = filename 
-        _msgbody = filename + CommonData.MsgHandlec.PADDING + username
-        _msgbody = _msgbody.encode("utf8")
+        self.filename = filename
+        msglist = [filename.encode("utf-8"),username.encode("utf-8")]
+        _msgbody = NetSocketFun.NetPackMsgBody(msglist).encode("utf-8")
         _msghead = struct.pack(CommonData.MsgHandlec.MSGHEADTYPE,MagicNum.MsgTypec.REQOBTAINFILE, len(_msgbody))
         NetSocketFun.NetSocketSend(self.__Sockfd,_msghead + _msgbody)
         

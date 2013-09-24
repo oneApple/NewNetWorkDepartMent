@@ -18,7 +18,7 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
         _cfd = ConfigData.ConfigData()
         _rsa = Rsa.Rsa(_cfd.GetKeyPath())
         _plaintext = _rsa.DecryptByPrikey(ciphertext)
-        _plist = _plaintext.split(CommonData.MsgHandlec.PADDING)
+        _plist = NetSocketFun.NetUnPackMsgBody(_plaintext)
         if session.sessionkey == _plist[0]:
             self.__aparam = _plist[1:]
             return True
@@ -60,12 +60,12 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
         
         showmsg = "A组采样过程："
         self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg,True)
-        self.__sampling = CommonData.MsgHandlec.PADDING.join(_gvs.GetSampling())
+        self.__sampling = NetSocketFun.NetPackMsgBody(_gvs.GetSampling())
         
     def addMediaToTable(self,session,sign,hash):
         "添加到数据库"
         _db = MediaTable.MediaTable()
-        _value = [session.filename.decode("utf-8"),session.peername.decode("utf8"),CommonData.MsgHandlec.PADDING.join(self.__aparam),sign,hash]
+        _value = [session.filename.decode("utf-8"),session.peername.decode("utf8"),NetSocketFun.NetPackMsgBody(self.__aparam),sign,hash]
         _db.Connect()
         _db.AddNewMedia(_value)
         _db.CloseCon()         
@@ -74,17 +74,18 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
         "分组验证"
         self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,"分组进行比对:",True)
         difList = []
-        localhash = self.__sampling.split(CommonData.MsgHandlec.PADDING)
-        for i in range(len(recvhash)):
+        localhash = NetSocketFun.NetUnPackMsgBody(self.__sampling)
+        recvlist = NetSocketFun.NetUnPackMsgBody(recvhash)
+        for i in range(len(recvlist)):
             try:
-                if localhash[i] != recvhash[i]:
+                if localhash[i] != recvlist[i]:
                     difList.append(i)
                     showmsg = "第" + str(i) + "组验证失败"
                 else:
                     showmsg = "第" + str(i) + "组验证成功"
                 self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg)
             except:
-                difList += [index for index in range(i,len(recvhash))]
+                difList += [index for index in range(i,len(recvlist))]
                 break
         
         import string
@@ -116,16 +117,17 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
     
     def HandleMsg(self,bufsize,session):
         recvbuffer = NetSocketFun.NetSocketRecv(session.sockfd,bufsize)
-        _msglist = recvbuffer.split(CommonData.MsgHandlec.PADDING)
+        _msglist = NetSocketFun.NetUnPackMsgBody(recvbuffer)
         if self.handleDhkeyAndAgroupParam(_msglist[0], session) == True:
             self.samplingAgroup(session)
             self.deltempFile(session)
             if self.verifySign(_msglist[1], session) == True:
-                self.compareSamplingHash(_msglist[2:])
-                self.addMediaToTable(session,_msglist[1],CommonData.MsgHandlec.PADDING.join(_msglist[2:]))
+                self.compareSamplingHash(_msglist[2])
+                self.addMediaToTable(session,_msglist[1],_msglist[2])
                 msghead = self.packetMsg(MagicNum.MsgTypec.RECVMEDIASUCCESS,0)
                 NetSocketFun.NetSocketSend(session.sockfd,msghead)
-                showmsg = "收到采样结果:\n(1)A组参数：" + ",".join(self.__aparam) + "\n(2)A组采样签名：" + _msglist[1] + "\n(3)本地A组采样：" + self.__sampling
+                showmsg = "收到采样结果:\n(1)A组参数：" + ",".join(self.__aparam) + "\n(2)A组采样签名：" + _msglist[1] \
+                           + "\n(3)本地A组采样：" + CommonData.MsgHandlec.SHOWPADDING.join(NetSocketFun.NetUnPackMsgBody(self.__sampling))
                 showmsg += "\n文件接收并验证成功"
                 self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg,True)
                 self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_REFRESHLOCALFILETABLE,"")

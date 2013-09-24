@@ -13,10 +13,10 @@ class RecvFileList(MsgHandleInterface.MsgHandleInterface,object):
     
     def HandleMsg(self,bufsize,session):
         recvbuffer = NetSocketFun.NetSocketRecv(session.sockfd,bufsize)
-        _fileList = recvbuffer.split(CommonData.MsgHandlec.PADDING) 
+        _fileList = NetSocketFun.NetUnPackMsgBody(recvbuffer) 
         table = []
-        for index in range(len(_fileList) / 2):
-            _singleFile = [_fileList[index * 2],_fileList[index * 2 + 1]]
+        for index in range(len(_fileList)):
+            _singleFile = NetSocketFun.NetUnPackMsgBody(_fileList[index])
             table.append(_singleFile)                                                                                      
         wx.CallAfter(Publisher().sendMessage,CommonData.ViewPublisherc.MAINFRAME_REFRESHNETFILETABLE,table)
         

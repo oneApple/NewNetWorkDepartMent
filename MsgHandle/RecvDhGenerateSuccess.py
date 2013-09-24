@@ -26,7 +26,8 @@ class RecvDhGenerateSuccess(MsgHandleInterface.MsgHandleInterface,object):
         "获取加密内容，加密会话密钥和迪非参数"
         _cfg = ConfigData.ConfigData()
         _rsa = Rsa.Rsa(_cfg.GetKeyPath())
-        plaintext = session.sessionkey + CommonData.MsgHandlec.PADDING + CommonData.MsgHandlec.PADDING.join(params)
+        msglist = [session.sessionkey] + params
+        plaintext = NetSocketFun.NetPackMsgBody(msglist)
         return _rsa.EncryptByPubkey(plaintext, session.peername)
     
     def packMsgBody(self,session):
@@ -36,22 +37,21 @@ class RecvDhGenerateSuccess(MsgHandleInterface.MsgHandleInterface,object):
         session.elgamal = Elgamal.Elgamal(*[string.atol(str(s)) for s in _params])
         elgamal1 = session.elgamal.EncryptoList(Elgamal.StringToList(self.getAgroupSign(session)))
         _cipher = self.getCipherText(session,[str(s) for s in _params])
-        _plaintext = session.control.auditfilename + CommonData.MsgHandlec.PADDING + \
-                     session.control.auditusername + CommonData.MsgHandlec.PADDING + \
-                     Elgamal.GetStructFmt(elgamal1) + CommonData.MsgHandlec.PADDING + \
-                     repr("".join(elgamal1))
-        
+        _plaintext = [session.control.auditfilename.encode("utf-8") ,session.control.auditusername.encode("utf-8"), \
+                      Elgamal.GetStructFmt(elgamal1),repr("".join(elgamal1))]
         #showmsg = "A组签名的elgamal加密：\n(1)第一次加密:" + repr(",".join(elgamal1))
         #self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg,True)
-        return repr(_cipher) + CommonData.MsgHandlec.PADDING + _plaintext
+        return [repr(_cipher)] + _plaintext
     
     def HandleMsg(self,bufsize,session):
         if session.control.ThreadType == CommonData.ThreadType.CONNECTCP:
             self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,"开始接收文件(" + session.control.filename + ")...")
-            msgbody = session.control.filename.encode("utf8")
+            msglist = [session.control.filename.encode("utf8")]
+            msgbody = NetSocketFun.NetPackMsgBody(msglist)
             msghead = self.packetMsg(MagicNum.MsgTypec.REQFILEBUFFER, len(msgbody))
             NetSocketFun.NetSocketSend(session.sockfd,msghead + msgbody)
         elif session.control.ThreadType == CommonData.ThreadType.CONNECTAP:
-            _msgbody = self.packMsgBody(session).encode("utf8")
+            msglist = self.packMsgBody(session)
+            _msgbody = NetSocketFun.NetPackMsgBody(msglist).encode("utf8")
             msghead = self.packetMsg(MagicNum.MsgTypec.SENDSIGNELGAMAL1, len(_msgbody))
             NetSocketFun.NetSocketSend(session.sockfd,msghead + _msgbody)

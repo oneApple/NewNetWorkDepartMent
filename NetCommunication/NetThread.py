@@ -27,7 +27,6 @@ class NetThread(threading.Thread):
         #跳出循环，线程结束，关闭socke
         self.sockfd.close()
         self.control.StopNetConnect()
-        print "thread close"
 
 
     def stop(self):

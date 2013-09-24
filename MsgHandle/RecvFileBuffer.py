@@ -25,7 +25,8 @@ class RecvFileBuffer(MsgHandleInterface.MsgHandleInterface,object):
         if session.currentbytes == 0:
             self.createMediaDir(session)
         recvbuffer = NetSocketFun.NetSocketRecv(session.sockfd,bufsize)
-        session.currentbytes += len(recvbuffer)
-        session.file.write(recvbuffer)
+        filebuffer = NetSocketFun.NetUnPackMsgBody(recvbuffer)[0]
+        session.currentbytes += len(filebuffer)
+        session.file.write(filebuffer)
         msghead = self.packetMsg(MagicNum.MsgTypec.REQFILEBUFFER, 0)
         NetSocketFun.NetSocketSend(session.sockfd,msghead)

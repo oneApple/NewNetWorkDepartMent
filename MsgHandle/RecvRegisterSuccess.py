@@ -13,8 +13,9 @@ class RecvRegisterSuccess(MsgHandleInterface.MsgHandleInterface,object):
     
     def HandleMsg(self,bufsize,session):
         recvbuffer = NetSocketFun.NetSocketRecv(session.sockfd,bufsize)
+        pubkey = NetSocketFun.NetUnPackMsgBody(recvbuffer)[0]
         from CryptoAlgorithms import RsaKeyExchange
         _rke = RsaKeyExchange.RsaKeyExchange()
-        _rke.WritePubkeyStr(session.peername,recvbuffer)
+        _rke.WritePubkeyStr(session.peername,pubkey)
         wx.CallAfter(Publisher().sendMessage,CommonData.ViewPublisherc.REGISTER_SWITCH,MagicNum.NOUserTablec.UNACCEPT)
         

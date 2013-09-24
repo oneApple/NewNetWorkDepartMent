@@ -14,8 +14,7 @@ class RecvLoginSuccess(MsgHandleInterface.MsgHandleInterface,object):
     
     def HandleMsg(self,bufsize,session):
         recvbuffer = NetSocketFun.NetSocketRecv(session.sockfd,bufsize)
-        recvbuffer = eval(recvbuffer)
-        recvlist = recvbuffer.split(CommonData.MsgHandlec.PADDING)
+        recvlist = NetSocketFun.NetUnPackMsgBody(recvbuffer)
         #wx.CallAfter(Publisher().sendMessage,CommonData.ViewPublisherc.LOGIN_SWITCH,recvlist)
         self.sendViewMsg(CommonData.ViewPublisherc.LOGIN_SWITCH,recvlist)
         

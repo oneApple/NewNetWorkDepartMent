@@ -4,6 +4,7 @@ class MsgHandlec:
     SAMPLINGTYPE = "fffff"
     PADDING = "###"
     ELGAMALPAD = "######"
+    SHOWPADDING = "::"
     SPARATE = "~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~.~\n"
     FILEBLOCKSIZE = 10240
 

@@ -2,13 +2,14 @@
 import wx, string, os
 from wx.lib.pubsub  import Publisher
 
-from GlobalData import CommonData, ConfigData, MagicNum
+from GlobalData import CommonData, ConfigData, MagicNum, WindowConfig
 from DataBase import MediaTable
 import MatrixTable
 
 class MyFrame(wx.Frame):
     def __init__(self,_permission,netconnect,msg):
-        wx.Frame.__init__(self, None, -1, "网络运营商",size = (1024,800))
+        self.wcfg = WindowConfig.WindowConfig()
+        wx.Frame.__init__(self, None, -1, "网络运营商",size = self.wcfg.GetFrameSize())
         
         self.peername = msg[0]
         self.peerpermission = msg[1]
@@ -20,7 +21,10 @@ class MyFrame(wx.Frame):
         self.__panel_top = wx.Panel(self)
         
         self.createHeadStaticText(text = "您好:" + self.username + ",欢迎使用CUCAuditSys!"+ "\n")
-        self.createHeadStaticText(align = wx.ALIGN_LEFT,text ="\n" + " 中国传媒大学内容审核系统" + "\n",fontsize = 15,fontcolor = "blue",backcolor = "bisque")
+        self.createHeadStaticText(align = wx.ALIGN_LEFT,text ="\n" + " 中国传媒大学内容审核系统" + "\n",\
+                                  fontsize = self.wcfg.GetSystemNameFontSize(),\
+                                  fontcolor = self.wcfg.GetSystemNameFontColor(),\
+                                  backcolor = self.wcfg.GetSystemNameBackColor())
         self.__vbox_top.Add(wx.StaticLine(self.__panel_top), 0, wx.EXPAND|wx.ALL, 5)
         self.createMenuBar()
         
@@ -146,8 +150,8 @@ class MyFrame(wx.Frame):
             return
         
         attr = wx.grid.GridCellAttr()
-        attr.SetTextColour("white")
-        attr.SetBackgroundColour("pink")
+        attr.SetTextColour(self.wcfg.GetTableChoseFontColor())
+        attr.SetBackgroundColour(self.wcfg.GetTableChoseBackColor())
         _grid.SetRowAttr(_pos, attr)
         
         if _gridCurPos != -1:
@@ -163,7 +167,7 @@ class MyFrame(wx.Frame):
         _grid = wx.grid.Grid(_panel)
         table = MatrixTable.MatrixTable(self.getLocalFileList(),["文件名","所有者"],[i for i in range(3)])
         _grid.SetTable(table, True)
-        _grid.SetRowLabelSize(30)
+        _grid.SetRowLabelSize(self.wcfg.GetTableLabelSize())
         self.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.evtGridRowLabelLeftClick)
         
         self.createBox([_grid,], _panel, vbox, label,partition = 2)
@@ -175,10 +179,8 @@ class MyFrame(wx.Frame):
         _panel = self.createPanel(panel)
         
         stext = wx.StaticText(_panel, -1, "")
-        Font= wx.Font(15, wx.MODERN, wx.NORMAL, wx.NORMAL)
-        stext.SetFont(Font)
-        stext.SetForegroundColour("black")
-        stext.SetBackgroundColour("white")
+        stext.SetFont(self.wcfg.GetStaticTextFont())
+        stext.SetForegroundColour(self.wcfg.GetStaticTextFontColor())
 
         self.createBox([stext,], _panel, hbox, "状态显示区")
         
@@ -298,9 +300,9 @@ class MyFrame(wx.Frame):
         _isChangeColor = recvmsg.data[1]
         if _isChangeColor:
             if self.__showTextColor:
-                self.__showText.SetForegroundColour("orange")
+                self.__showText.SetForegroundColour(self.wcfg.GetShowTextFontColor1())
             else:
-                self.__showText.SetForegroundColour("black")
+                self.__showText.SetForegroundColour(self.wcfg.GetShowTextFontColor2())
             self.__showTextColor = not self.__showTextColor
         self.__showText.AppendText(msg)
     
@@ -308,10 +310,9 @@ class MyFrame(wx.Frame):
         "创建右下方的文本显示框"
         _panel = self.createPanel(self.__panel_top)
         
-        Font= wx.Font(25, wx.MODERN, wx.NORMAL, wx.NORMAL)
-        self.__showText = wx.TextCtrl(_panel,style=wx.TE_MULTILINE|wx.HSCROLL|wx.TE_READONLY)  
-        self.__showText.SetFont(Font)
-        self.__showText.SetBackgroundColour("white")
+        self.__showText = wx.TextCtrl(_panel, style=wx.TE_MULTILINE | wx.HSCROLL | wx.TE_READONLY)  
+        self.__showText.SetFont(self.wcfg.GetShowTextFont())
+        self.__showText.SetBackgroundColour(self.wcfg.GetShowTextBackColor())
         
         self.createBox([self.__showText,], _panel, self.__hbox, "信息显示区",3)
     
