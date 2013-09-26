@@ -69,8 +69,9 @@ class RecvSignElgamal12(MsgHandleInterface.MsgHandleInterface,object):
         _efm.WaitForProcess()
         
         import os
+        filesize = float(os.path.getsize(_meidaPath)) / (1024 * 1024)
         showmsg = "采样完成:\n(1)总帧数：" + self.getFrameNum(session.filename) + \
-                  "\n(2)文件大小(byte)：" + str(os.path.getsize(_meidaPath))
+                  "\n(2)文件大小（MB）：" + str(filesize)
         self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg,True)
         
         _filename = session.filename[:session.filename.index(".")]

@@ -24,6 +24,8 @@ class ViewPublisherc:
     MAINFRAME_REFRESHSTATIC = "mainframerefstatic"
     MAINFRAME_REFRESHNETFILETABLE = "mainframerefnetfiletable"
     MAINFRAME_REFRESHLOCALFILETABLE = "mainframereflocalfiletable"
+    FULLFRAME_APPENDTEXT = "fullframeappendtext"
+
     
 
 class MainFramec:

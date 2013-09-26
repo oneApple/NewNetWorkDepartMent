@@ -4,7 +4,7 @@ from wx.lib.pubsub  import Publisher
 
 from GlobalData import CommonData, ConfigData, MagicNum, WindowConfig
 from DataBase import MediaTable
-import MatrixTable
+import MatrixTable, FullScreenFrame
 
 class MyFrame(wx.Frame):
     def __init__(self,_permission,netconnect,msg):
@@ -43,6 +43,8 @@ class MyFrame(wx.Frame):
         self.__gridLocalCurPos = -1
         self.__showTextColor = True
         self.__contentList = []
+        
+        self.fullframe = FullScreenFrame.FullScreenFrame(self,-1,"信息显示区")    
         
         self.netconnect = netconnect
         self.netconnect.ReqFileList()
@@ -297,6 +299,8 @@ class MyFrame(wx.Frame):
         msg = recvmsg.data[0].decode("utf8")
         msg += "\n"
         
+        wx.CallAfter(Publisher().sendMessage,CommonData.ViewPublisherc.FULLFRAME_APPENDTEXT,recvmsg.data)
+        
         _isChangeColor = recvmsg.data[1]
         if _isChangeColor:
             if self.__showTextColor:
@@ -306,6 +310,10 @@ class MyFrame(wx.Frame):
             self.__showTextColor = not self.__showTextColor
         self.__showText.AppendText(msg)
     
+    def evtShowTextDoubleClick(self,evt):
+        self.fullframe.ShowFullScreenFrame()
+        self.Hide()
+    
     def createShowTextCtrl(self):
         "创建右下方的文本显示框"
         _panel = self.createPanel(self.__panel_top)
@@ -313,8 +321,9 @@ class MyFrame(wx.Frame):
         self.__showText = wx.TextCtrl(_panel, style=wx.TE_MULTILINE | wx.HSCROLL | wx.TE_READONLY)  
         self.__showText.SetFont(self.wcfg.GetShowTextFont())
         self.__showText.SetBackgroundColour(self.wcfg.GetShowTextBackColor())
+        self.__showText.Bind(wx.EVT_LEFT_DCLICK, self.evtShowTextDoubleClick)
         
-        self.createBox([self.__showText,], _panel, self.__hbox, "信息显示区",3)
+        self.createBox([self.__showText, ], _panel, self.__hbox, "信息显示区", 3)
     
     def registerPublisher(self):
         Publisher().subscribe(self.refreshLocalFileList, CommonData.ViewPublisherc.MAINFRAME_REFRESHLOCALFILETABLE)
@@ -330,7 +339,7 @@ class MyFrame(wx.Frame):
         self.SetMenuBar(self.__menuBar)
     
     def createMenu(self,parentMenu,label,child):
-        self.Bind(wx.EVT_CLOSE, self.OnClose, self)
+        #self.Bind(wx.EVT_CLOSE, self.OnClose, self)
         if type(child) == dict:
             menu = wx.Menu()
             if parentMenu == self.__menuBar: 
@@ -347,10 +356,13 @@ class MyFrame(wx.Frame):
     
     def menuClearDisplayCmd(self,event):
         self.__showText.Clear()
+        self.fullframe.clearShowText()
     
-    def OnClose(self,event):
-        self.Destroy()
-        self.netconnect.StopNetConnect()
+#    def OnClose(self,event):
+#        self.fullframe.Destroy()
+#        self.Destroy()
+#        self.netconnect.StopNetConnect()
+        
             
     def Run(self):
         self.Center()
