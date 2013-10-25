@@ -11,6 +11,7 @@ from NetCommunication import NetConnect, NetSocketFun
 class LoginDialog(ValidaDialog.ValidaDialog,object):
     def __init__(self,netconnect,type):
         super(LoginDialog,self).__init__("登录",MagicNum.ValidaDialogc.IMAGEBUTTON)
+        self.CheckConfig()
         if not netconnect:
             self.__netconnect = NetConnect.NetConnect(self)
             config = ConfigData.ConfigData()
@@ -21,7 +22,22 @@ class LoginDialog(ValidaDialog.ValidaDialog,object):
             self.__netconnect = netconnect
         self.__type = type
         self.registerPublisher()
-        
+    
+    def CheckConfig(self):
+        try:
+            cfg = ConfigData.ConfigData()
+            pathmap = {cfg.GetDbPath():"数据库配置不正确",
+               cfg.GetYVectorFilePath():"采样存放路径配置不正确",
+               cfg.GetFfmpegPathAndArgs()[0]:"ffmpeg程序配置不正确",
+               cfg.GetKeyPath():"密钥路径配置不正确"
+               }
+            for path in pathmap:
+                import os
+                if not os.path.exists(path):
+                    self.tryAgain(pathmap[path])
+        except Exception,e:
+            self.tryAgain("配置文件不存在或路径错误")
+    
     def registerPublisher(self):
         Publisher().subscribe(self.tryAgain, CommonData.ViewPublisherc.LOGIN_TRYAGAIN)    
         Publisher().subscribe(self.SwitchView, CommonData.ViewPublisherc.LOGIN_SWITCH)     
