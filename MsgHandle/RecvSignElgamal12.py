@@ -68,11 +68,11 @@ class RecvSignElgamal12(MsgHandleInterface.MsgHandleInterface,object):
         _efm.Run()
         _efm.WaitForProcess()
         
-        import os
-        filesize = float(os.path.getsize(_meidaPath)) / (1024 * 1024)
-        showmsg = "采样完成:\n(1)总帧数：" + self.getFrameNum(session.filename) + \
-                  "\n(2)文件大小（MB）：" + str(filesize)
-        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg,True)
+#        import os
+#        filesize = float(os.path.getsize(_meidaPath)) / (1024 * 1024)
+#        showmsg = "采样完成:\n(1)I帧总数：" + self.getFrameNum(session.filename) + \
+#                  "\n(2)文件大小（MB）：" + str(filesize)
+#        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg,True)
         
         _filename = session.filename[:session.filename.index(".")]
         
@@ -80,6 +80,12 @@ class RecvSignElgamal12(MsgHandleInterface.MsgHandleInterface,object):
         self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg, True)
         _gvs = GetVideoSampling.GetVideoSampling(_filename,*_aparam)
         self.__sampling = NetSocketFun.NetPackMsgBody(_gvs.GetSampling())       
+        
+        import os
+        filesize = float(os.path.getsize(_meidaPath)) / (1024 * 1024)
+        showmsg = "采样完成:\n(1)I帧总数：" + self.getFrameNum(session.filename) + \
+                  "\n(2)文件大小（MB）：" + str(filesize)
+        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg,True)
     
     def compareSamplingHash(self,localhash,recvhash):
         "分组验证"

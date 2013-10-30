@@ -46,6 +46,9 @@ class FullScreenFrame(wx.Frame):
 
         self.__showText.AppendText(msg)
     
+    def clearShowText(self):
+        self.__showText.Clear()    
+    
     def evtDoubleClick(self,evt):
         self.parentFrame.Show()
         self.Hide()

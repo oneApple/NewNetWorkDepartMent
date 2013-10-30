@@ -52,9 +52,9 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
         
         import os
         filesize = float(os.path.getsize(_meidaPath)) / (1024 * 1024)
-        showmsg = "采样完成:\n(1)总帧数：" + self.getFrameNum(session.filename) + \
-                  "\n(2)文件大小(byte)：" + str(filesize)
-        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg, True)
+#        showmsg = "采样完成:\n(1)I帧总数：" + self.getFrameNum(session.filename) + \
+#                  "\n(2)文件大小(byte)：" + str(filesize)
+#        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg, True)
         
         _filename = session.filename[:session.filename.index(".")]
         _gvs = GetVideoSampling.GetVideoSampling(_filename,*_aparam)
@@ -62,6 +62,10 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
         showmsg = "A组采样过程："
         self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg,True)
         self.__sampling = NetSocketFun.NetPackMsgBody(_gvs.GetSampling())
+        
+        showmsg = "采样完成:\n(1)I帧总数：" + self.getFrameNum(session.filename) + \
+                  "\n(2)文件大小(byte)：" + str(filesize)
+        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg, True)
         
     def addMediaToTable(self,session,sign,hash):
         "添加到数据库"
@@ -120,6 +124,10 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
         recvbuffer = NetSocketFun.NetSocketRecv(session.sockfd,bufsize)
         _msglist = NetSocketFun.NetUnPackMsgBody(recvbuffer)
         if self.handleDhkeyAndAgroupParam(_msglist[0], session) == True:
+            showmsg = "解密获取参数及采样结果:\n(1)A组参数：\n(帧总数,分组参数,帧间隔位数,混沌初值,分支参数)\n(" + ",".join(self.__aparam) + ")\n(2)A组采样签名：" + _msglist[1] \
+                           + "\n(3)本地A组采样：" + CommonData.MsgHandlec.SHOWPADDING.join(NetSocketFun.NetUnPackMsgBody(_msglist[2]))
+            self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg,True)
+            
             self.samplingAgroup(session)
             self.deltempFile(session)
             if self.verifySign(_msglist[1], session) == True:
@@ -127,9 +135,11 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
                 self.addMediaToTable(session,_msglist[1],_msglist[2])
                 msghead = self.packetMsg(MagicNum.MsgTypec.RECVMEDIASUCCESS,0)
                 NetSocketFun.NetSocketSend(session.sockfd,msghead)
-                showmsg = "收到采样结果:\n(1)A组参数：" + ",".join(self.__aparam) + "\n(2)A组采样签名：" + _msglist[1] \
-                           + "\n(3)本地A组采样：" + CommonData.MsgHandlec.SHOWPADDING.join(NetSocketFun.NetUnPackMsgBody(self.__sampling))
-                showmsg += "\n文件接收并验证成功"
+#                showmsg = "收到采样结果:\n(1)A组参数：" + ",".join(self.__aparam) + "\n(2)A组采样签名：" + _msglist[1] \
+#                           + "\n(3)本地A组采样：" + CommonData.MsgHandlec.SHOWPADDING.join(NetSocketFun.NetUnPackMsgBody(self.__sampling))
+#                showmsg += "\n文件接收并验证成功"
+#                self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg,True)
+                showmsg = "文件接收并验证成功"
                 self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg,True)
                 self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_REFRESHLOCALFILETABLE,"")
                 _msghead = self.packetMsg(MagicNum.MsgTypec.REQCLOSEMSG, 0)
