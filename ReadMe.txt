@@ -34,6 +34,7 @@ SENDSIGNELGAMAL12:RecvSignElgamal12 : 进行责任认定，如果
 （3）其他是审核问题
 
 SENDHASHELGAMAL12:RecvHashElgamal12 : 验证该组是否被篡改 SENDHASHELGAMAL1
+当全部都验证完毕，向ＡＰ发送SENDIDENTIFYRES，其中该消息包含责任方类型，出错组号列表
 
 
 

@@ -100,6 +100,14 @@ class RecvHashElgamal12(MsgHandleInterface.MsgHandleInterface,object):
             showmsg += "\n第" + str(_dif) + "组存在篡改，篡改帧区间为：" + str(_groupborder[_dif]) + "-" + str(_groupborder[_dif + 1]) +"帧"
         self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg)
     
+    def sendResultToAp(self,session):
+        sendList = [str(session.response)]
+        for index in session.difList:
+            sendList.append(str(index))
+        msgbody = NetSocketFun.NetPackMsgBody(sendList)
+        msghead = self.packetMsg(MagicNum.MsgTypec.SENDIDENTIFYRES, len(msgbody))
+        NetSocketFun.NetSocketSend(session.sockfd,msghead + msgbody)
+    
     def HandleMsg(self,bufsize,session):
         recvbuffer = NetSocketFun.NetSocketRecv(session.sockfd,bufsize)
         _msglist = NetSocketFun.NetUnPackMsgBody(recvbuffer)
@@ -110,6 +118,7 @@ class RecvHashElgamal12(MsgHandleInterface.MsgHandleInterface,object):
                 self.sendHashELgamal(session,_ahash)
             else:
                 self.showresult(session)
+                self.sendResultToAp(session)
             return
         else:
             showmsg = "签名验证失败,发送方为恶意用户"

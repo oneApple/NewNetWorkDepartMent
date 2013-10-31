@@ -26,14 +26,11 @@ class ViewPublisherc:
     MAINFRAME_REFRESHLOCALFILETABLE = "mainframereflocalfiletable"
     FULLFRAME_APPENDTEXT = "fullframeappendtext"
 
-    
-
 class MainFramec:
     AUDITSERVER = 1001
     CONTENTSERVER = 2002
     toolmenu = {"清理屏幕".decode("utf8"):"ClearDisplay"}
     menuMap = {"工具":toolmenu}
-    
     
 class Rsac:
     "密钥及明文长度:对应关系为:1024:128,2048:256"
@@ -47,3 +44,9 @@ class HashBySha1c:
 
 class SamplingFrameArrayc:
     GROUPPARAMELEN = 7
+    
+class Response:
+    AP = 0
+    CP = 1
+    NO = 2
+    

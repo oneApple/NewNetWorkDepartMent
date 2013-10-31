@@ -118,6 +118,7 @@ class RecvSignElgamal12(MsgHandleInterface.MsgHandleInterface,object):
         for _dif in difList:
             showmsg += "\n第" + str(_dif) + "组存在篡改，篡改帧区间为：" + str(_groupborder[_dif]) + "-" + str(_groupborder[_dif + 1]) +"帧"
         self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg)
+        return difList
     
     def getCipherText(self,session,params):
         _cfg = ConfigData.ConfigData()
@@ -140,18 +141,30 @@ class RecvSignElgamal12(MsgHandleInterface.MsgHandleInterface,object):
         _msghead = self.packetMsg(MagicNum.MsgTypec.SENDHASHELGAMAL1, len(_msgbody))
         NetSocketFun.NetSocketSend(session.sockfd,_msghead + _msgbody)
     
+    def sendResultToAp(self,session,difList):
+        sendList = [str(CommonData.Response.NO)]
+        for index in difList:
+            sendList.append(str(index))
+        msgbody = NetSocketFun.NetPackMsgBody(sendList)
+        msghead = self.packetMsg(MagicNum.MsgTypec.SENDIDENTIFYRES, len(msgbody))
+        NetSocketFun.NetSocketSend(session.sockfd,msghead + msgbody)
+    
     def IdentifyResponsibility(self,session):
         "进行责任认定"
         if not Elgamal.CompareStringList(self.__recvelgamal2,self.__compelgamal2):
             #如果二者的签名相同，则比较hash值
+            session.response = CommonData.Response.CP
             self.sendHashELgamal(session)
             showmsg = "审核部门和运营商保存的内容提供商签名不同，所以内容提供商篡改文件"
         elif not self.verifySign(self.__Noasign, session):
-            self.compareSamplingHash(self.__sampling,self.__NoaHash)
+            session.response = CommonData.Response.NO
+            difList = self.compareSamplingHash(self.__sampling,self.__NoaHash)
+            self.sendResultToAp(session, difList)
             #比较本地采样的hash和本地保存的hash
             showmsg = "文件采样验证失败，所以运营商篡改文件"
         else:
             #self.compareSamplingHash(self.__APahash,self.__NoaHash)
+            session.response = CommonData.Response.AP
             self.sendHashELgamal(session)
             self.compareSamplingHash(self.__sampling,self.__NoaHash)
             showmsg = "网络运营商和内容提供商无过错"
