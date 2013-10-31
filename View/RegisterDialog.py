@@ -35,8 +35,7 @@ class RegisterDialog(ValidaDialog.ValidaDialog,object):
 
     def SwitchView(self,msg):
         self.Destroy()
-        _loginFrame = LoginDialog.LoginDialog(self.__netconnect,self.__type,None,None,None)
-        _loginFrame.Run()
+        wx.MessageBox("已注册成功，请重启程序登录")
 
     def addNewUser(self,inputlist):
         del inputlist[1]

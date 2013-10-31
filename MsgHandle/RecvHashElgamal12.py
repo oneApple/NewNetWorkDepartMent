@@ -55,7 +55,9 @@ class RecvHashElgamal12(MsgHandleInterface.MsgHandleInterface,object):
         elgamal1 = session.elgamal.EncryptoList(Elgamal.StringToList(hash))
         _cipher = self.getCipherText(session,[str(s) for s in _params])
         _plaintext = [str(self.__index),Elgamal.GetStructFmt(elgamal1),"".join(elgamal1)]
-        #self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg)
+        showmsg = "进行第一次加密，第一次加密结果发送给AP\n"
+        showmsg += "进行第二次加密，第二次加密结果发送给AP"
+        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg)
         msglist = [_cipher] + _plaintext
         _msgbody = NetSocketFun.NetPackMsgBody(msglist)
         _msghead = self.packetMsg(MagicNum.MsgTypec.SENDHASHELGAMAL1, len(_msgbody))
