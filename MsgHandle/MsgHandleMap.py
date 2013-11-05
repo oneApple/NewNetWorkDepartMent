@@ -4,7 +4,7 @@ from GlobalData.MagicNum import MsgTypec
 from MsgHandle import RecvLoginSuccess, RecvDhGenerateSuccess,IdentifyVerifyFailed,\
                       RecvLoginFail, RecvRegisterFail, RecvRegisterSuccess,RecvAndSendDh ,\
                       RecvFileList, RecvFileBuffer, RecvAllFile, RecvAgroupSignAndParam,\
-                      RecvSignElgamal12, RecvHashElgamal12
+                      RecvHashElgamal1, RecvHashElgamal2
                       
 class MsgHandleMap:
     def __init__(self):
@@ -21,9 +21,9 @@ class MsgHandleMap:
                                MsgTypec.SENDFILEBUFFER:RecvFileBuffer.RecvFileBuffer(),
                                MsgTypec.SENDFILEOVER:RecvAllFile.RecvAllFile(),
                                MsgTypec.SENDAGROUP:RecvAgroupSignAndParam.RecvAgroupSignAndParam(),
-                               MsgTypec.SENDSIGNELGAMAL12:RecvSignElgamal12.RecvSignElgamal12(),
                                
-                               MsgTypec.SENDHASHELGAMAL12:RecvHashElgamal12.RecvHashElgamal12(),
+                               MsgTypec.SENDHASHELGAMAL1:RecvHashElgamal1.RecvHashElgamal1(),
+                               MsgTypec.SENDHASHELGAMAL2:RecvHashElgamal2.RecvHashElgamal2(),
                                                
                                MsgTypec.IDENTITYVERIFYFAILED:IdentifyVerifyFailed.IdentifyVerifyFailed()
                                }

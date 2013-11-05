@@ -11,7 +11,7 @@ class RecvDhGenerateSuccess(MsgHandleInterface.MsgHandleInterface,object):
     def __init__(self):
         super(RecvDhGenerateSuccess,self).__init__() 
     
-    def getAgroupSign(self,session):
+    def getAgroupHash(self,session):
         "获取文件A组采样签名"
         _db = MediaTable.MediaTable()
         _db.Connect()
@@ -20,7 +20,7 @@ class RecvDhGenerateSuccess(MsgHandleInterface.MsgHandleInterface,object):
         _res = _db.searchMedia(session.filename,session.contentname)
         _db.CloseCon()
         _hbs = HashBySha1.HashBySha1()
-        return _hbs.GetHash(_res[0][3],MagicNum.HashBySha1c.HEXADECIMAL)
+        return _res[0][4]
 
     def getCipherText(self,session,params):
         "获取加密内容，加密会话密钥和迪非参数"
@@ -30,17 +30,26 @@ class RecvDhGenerateSuccess(MsgHandleInterface.MsgHandleInterface,object):
         plaintext = NetSocketFun.NetPackMsgBody(msglist)
         return _rsa.EncryptByPubkey(plaintext, session.peername)
     
+    def getHashElgamalList(self,session):
+        hashlist = NetSocketFun.NetUnPackMsgBody(self.getAgroupHash(session))
+        elgamallsit = []
+        for cphash in hashlist:
+            elgamal1 = session.elgamal.EncryptoList(Elgamal.StringToList(cphash))
+            elgamallsit.append(Elgamal.GetStructFmt(elgamal1))
+            elgamallsit.append("".join(elgamal1))
+        
+        return elgamallsit
+    
     def packMsgBody(self,session):
         "消息体内容：会话密钥，参数，结构形式，第一次加密"
         _params = Elgamal.GetElgamalParamqp()
         import string
         session.elgamal = Elgamal.Elgamal(*[string.atol(str(s)) for s in _params])
-        elgamal1 = session.elgamal.EncryptoList(Elgamal.StringToList(self.getAgroupSign(session)))
         _cipher = self.getCipherText(session,[str(s) for s in _params])
-        _plaintext = [session.control.auditfilename.encode("utf-8") ,session.control.auditusername.encode("utf-8"), \
-                      Elgamal.GetStructFmt(elgamal1),repr("".join(elgamal1))]
-        #showmsg = "A组签名的elgamal加密：\n(1)第一次加密:" + repr(",".join(elgamal1))
-        #self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg,True)
+        _plaintext = [session.control.auditfilename.encode("utf-8") ,session.control.auditusername.encode("utf-8")] \
+                     + self.getHashElgamalList(session)
+        showmsg = "一次加密Ａ组比特串承诺"
+        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg,True)
         return [repr(_cipher)] + _plaintext
     
     def HandleMsg(self,bufsize,session):
@@ -52,6 +61,6 @@ class RecvDhGenerateSuccess(MsgHandleInterface.MsgHandleInterface,object):
             NetSocketFun.NetSocketSend(session.sockfd,msghead + msgbody)
         elif session.control.ThreadType == CommonData.ThreadType.CONNECTAP:
             msglist = self.packMsgBody(session)
-            _msgbody = NetSocketFun.NetPackMsgBody(msglist).encode("utf8")
-            msghead = self.packetMsg(MagicNum.MsgTypec.SENDSIGNELGAMAL1, len(_msgbody))
-            NetSocketFun.NetSocketSend(session.sockfd,msghead + _msgbody)
+            _msgbody = NetSocketFun.NetPackMsgBody(msglist)
+            msghead = self.packetMsg(MagicNum.MsgTypec.SENDHASHELGAMAL1, len(_msgbody))
+            NetSocketFun.NetSocketSend(session.sockfd,msghead + _msgbody)   
