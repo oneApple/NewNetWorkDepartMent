@@ -10,17 +10,76 @@ from DataBase import MediaTable
 class RecvDhGenerateSuccess(MsgHandleInterface.MsgHandleInterface,object):
     def __init__(self):
         super(RecvDhGenerateSuccess,self).__init__() 
+        _cfg = ConfigData.ConfigData()
+        self.__mediapath = _cfg.GetMediaPath()
+        
+    def getAgroupParam(self,session):
+        "获取文件A组采样参数和签名"
+        _db = MediaTable.MediaTable()
+        _db.Connect()
+        session.auditfile = session.control.auditfilename.decode("utf-8")
+        session.audituser = session.control.auditusername
+        _res = _db.searchMedia(session.auditfile,session.audituser)
+        _db.CloseCon()
+        return NetSocketFun.NetUnPackMsgBody(_res[0][2])
+    
+    def getFrameNum(self,filename):
+        "获取目录下文件数即帧的数目"
+        import os
+        _cfg = ConfigData.ConfigData()
+        _dirname = _cfg.GetYVectorFilePath() + filename[:filename.index(".")]
+        _framenum = sum([len(files) for root,dirs,files in os.walk(_dirname)])
+        return str(_framenum)
+    
+    def samplingAgroup(self,session):
+        "利用A组参数采样"
+        from VideoSampling import ExecuteFfmpeg, GetVideoSampling
+        import string
+        _aparam = [string.atoi(s) for s in self.__aparam[:3]]
+        _aparam += [string.atof(s) for s in self.__aparam[3:]]
+        session.auditfile = session.control.auditfilename.decode("utf-8")
+        session.audituser = session.control.auditusername
+        _meidaPath = self.__mediapath + "/" + session.audituser + "/" + session.auditfile
+        #必须绝对路径才可以
+        showmsg = "正在采样 ..."
+        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg)
+        _efm = ExecuteFfmpeg.ExecuteFfmpeg(_meidaPath)
+        _efm.Run()
+        _efm.WaitForProcess()
+        
+#        import os
+#        filesize = float(os.path.getsize(_meidaPath)) / (1024 * 1024)
+#        showmsg = "采样完成:\n(1)I帧总数：" + self.getFrameNum(session.filename) + \
+#                  "\n(2)文件大小（MB）：" + str(filesize)
+#        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg,True)
+        
+        _filename = session.auditfile[:session.auditfile.index(".")]
+        
+        showmsg = "Ａ组采样过程:"
+        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg, True)
+        _gvs = GetVideoSampling.GetVideoSampling(_filename,*_aparam)
+        self.__sampling = NetSocketFun.NetPackMsgBody(_gvs.GetSampling())       
+        
+        import os
+        filesize = float(os.path.getsize(_meidaPath)) / (1024 * 1024)
+        showmsg = "采样完成:\n(1)I帧总数：" + self.getFrameNum(session.auditfile) + \
+                  "\n(2)文件大小（MB）：" + str(filesize)
+        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg,True)
     
     def getAgroupHash(self,session):
         "获取文件A组采样签名"
-        _db = MediaTable.MediaTable()
-        _db.Connect()
-        session.filename = session.control.auditfilename.decode("utf-8")
-        session.contentname = session.control.auditusername
-        _res = _db.searchMedia(session.filename,session.contentname)
-        _db.CloseCon()
-        _hbs = HashBySha1.HashBySha1()
-        return _res[0][4]
+#        _db = MediaTable.MediaTable()
+#        _db.Connect()
+#        session.filename = session.control.auditfilename.decode("utf-8")
+#        session.contentname = session.control.auditusername
+#        _res = _db.searchMedia(session.filename,session.contentname)
+#        _db.CloseCon()
+#        _hbs = HashBySha1.HashBySha1()
+#        return _res[0][4]
+        self.__aparam = self.getAgroupParam(session)
+        self.samplingAgroup(session)
+        return self.__sampling
+
 
     def getCipherText(self,session,params):
         "获取加密内容，加密会话密钥和迪非参数"
