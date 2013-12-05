@@ -9,7 +9,7 @@ import MatrixTable, FullScreenFrame
 class MyFrame(wx.Frame):
     def __init__(self,_permission,netconnect,msg):
         self.wcfg = WindowConfig.WindowConfig()
-        wx.Frame.__init__(self, None, -1, "网络运营商",size = self.wcfg.GetFrameSize())
+        wx.Frame.__init__(self, None, -1, "内容保护子系统-互信系统",size = self.wcfg.GetFrameSize())
         
         self.peername = msg[0]
         self.peerpermission = msg[1]
@@ -20,8 +20,8 @@ class MyFrame(wx.Frame):
         self.__hbox = wx.BoxSizer(wx.HORIZONTAL)
         self.__panel_top = wx.Panel(self)
         
-        self.createHeadStaticText(text = "您好:" + self.username + ",欢迎使用CUCAuditSys!"+ "\n")
-        self.createHeadStaticText(align = wx.ALIGN_LEFT,text ="\n" + " 互信系统" + "\n",\
+        self.createHeadStaticText(text = "您好:" + self.username + ",欢迎使用内容保护子系统-互信系统!"+ "\n")
+        self.createHeadStaticText(align = wx.ALIGN_LEFT,text ="\n" + " 网络运营部门" + "\n",\
                                   fontsize = self.wcfg.GetSystemNameFontSize(),\
                                   fontcolor = self.wcfg.GetSystemNameFontColor(),\
                                   backcolor = self.wcfg.GetSystemNameBackColor())
@@ -96,8 +96,8 @@ class MyFrame(wx.Frame):
         _recvmsg = recvmsg
         if type(recvmsg) != list:
             _recvmsg = recvmsg.data
-        showmsg = "当前正在处理文件:"+ _recvmsg[0] + "\n"
-        showmsg += "当前正在进行操作:" + _recvmsg[1]
+        showmsg = "处理文件:"+ _recvmsg[0] + "\n"
+        showmsg += "当前状态:" + _recvmsg[1]
         self.__infoStatic.SetLabel(showmsg)
     
     def refreshNetFileList(self,recvmsg):
@@ -184,7 +184,7 @@ class MyFrame(wx.Frame):
         stext.SetFont(self.wcfg.GetStaticTextFont())
         stext.SetForegroundColour(self.wcfg.GetStaticTextFontColor())
 
-        self.createBox([stext,], _panel, hbox, "状态显示区")
+        self.createBox([stext,], _panel, hbox, "操作结果区")
         
         return stext
     
@@ -210,6 +210,7 @@ class MyFrame(wx.Frame):
         _filename = self.__netFileTable.GetCellValue(self.__gridNetCurPos,0)
         _contentSocket.ReqFile(_filename,self.username)
         self.__contentList.append(_contentSocket)
+        self.refreshStaticText([_filename,"正在请求分发"])
         return
     
     def createLeft3Button(self,panel,vbox):
@@ -254,6 +255,7 @@ class MyFrame(wx.Frame):
         _filename = self.__localFileTable.GetCellValue(self.__gridLocalCurPos,0)
         _ownername = self.__localFileTable.GetCellValue(self.__gridLocalCurPos,1)
         self.netconnect.ReqIdentify(_ownername,_filename)
+        self.refreshStaticText([_filename,"正在责任认定"])
     
     def createLeft5Button(self,panel,vbox):
         _panel = self.createPanel(panel)

@@ -11,7 +11,7 @@ class RecvHashElgamal2(MsgHandleInterface.MsgHandleInterface,object):
         super(RecvHashElgamal2,self).__init__()
     
     def getAgroupParam(self,session):
-        "获取文件A组采样参数和签名"
+        "获取文件A组特征提取参数和签名"
         _db = MediaTable.MediaTable()
         _db.Connect()
         session.auditfile = session.control.auditfilename.decode("utf-8")
@@ -53,10 +53,12 @@ class RecvHashElgamal2(MsgHandleInterface.MsgHandleInterface,object):
         if self.handleRecvMsg(_msglist, session) == True:
             showmsg = "此次验证结束"
             self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg,True)
+            self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg,True)
+            self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_REFRESHSTATIC,[session.auditfile,"责任认定完成"])
             return 
         else:
             showmsg = "签名验证失败,发送方为恶意用户"
-            self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg,True)
+            self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_REFRESHSTATIC,[session.auditfile,"责任认定完成"])
         msghead = self.packetMsg(MagicNum.MsgTypec.IDENTITYVERIFYFAILED,0)
         NetSocketFun.NetSocketSend(session.sockfd,msghead)
         

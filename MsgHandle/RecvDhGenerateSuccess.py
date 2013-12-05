@@ -14,7 +14,7 @@ class RecvDhGenerateSuccess(MsgHandleInterface.MsgHandleInterface,object):
         self.__mediapath = _cfg.GetMediaPath()
         
     def getAgroupParam(self,session):
-        "获取文件A组采样参数和签名"
+        "获取文件A组特征提取参数和签名"
         _db = MediaTable.MediaTable()
         _db.Connect()
         session.auditfile = session.control.auditfilename.decode("utf-8")
@@ -32,7 +32,7 @@ class RecvDhGenerateSuccess(MsgHandleInterface.MsgHandleInterface,object):
         return str(_framenum)
     
     def samplingAgroup(self,session):
-        "利用A组参数采样"
+        "利用A组参数特征提取"
         from VideoSampling import ExecuteFfmpeg, GetVideoSampling
         import string
         _aparam = [string.atoi(s) for s in self.__aparam[:3]]
@@ -41,7 +41,7 @@ class RecvDhGenerateSuccess(MsgHandleInterface.MsgHandleInterface,object):
         session.audituser = session.control.auditusername
         _meidaPath = self.__mediapath + "/" + session.audituser + "/" + session.auditfile
         #必须绝对路径才可以
-        showmsg = "正在采样 ..."
+        showmsg = "正在特征提取 ..."
         self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg)
         _efm = ExecuteFfmpeg.ExecuteFfmpeg(_meidaPath)
         _efm.Run()
@@ -49,25 +49,25 @@ class RecvDhGenerateSuccess(MsgHandleInterface.MsgHandleInterface,object):
         
 #        import os
 #        filesize = float(os.path.getsize(_meidaPath)) / (1024 * 1024)
-#        showmsg = "采样完成:\n(1)I帧总数：" + self.getFrameNum(session.filename) + \
+#        showmsg = "特征提取完成:\n(1)I帧总数：" + self.getFrameNum(session.filename) + \
 #                  "\n(2)文件大小（MB）：" + str(filesize)
 #        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg,True)
         
         _filename = session.auditfile[:session.auditfile.index(".")]
         
-        showmsg = "Ａ组采样过程:"
+        showmsg = "Ａ组特征提取过程:"
         self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg, True)
         _gvs = GetVideoSampling.GetVideoSampling(_filename,*_aparam)
         self.__sampling = NetSocketFun.NetPackMsgBody(_gvs.GetSampling())       
         
         import os
         filesize = float(os.path.getsize(_meidaPath)) / (1024 * 1024)
-        showmsg = "采样完成:\n(1)I帧总数：" + self.getFrameNum(session.auditfile) + \
+        showmsg = "特征提取完成:\n(1)I帧总数：" + self.getFrameNum(session.auditfile) + \
                   "\n(2)文件大小（MB）：" + str(filesize)
         self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg,True)
     
     def getAgroupHash(self,session):
-        "获取文件A组采样签名"
+        "获取文件A组特征提取签名"
 #        _db = MediaTable.MediaTable()
 #        _db.Connect()
 #        session.filename = session.control.auditfilename.decode("utf-8")
