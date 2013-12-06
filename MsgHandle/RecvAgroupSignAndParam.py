@@ -142,7 +142,7 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
                 showmsg = "文件接收并验证成功"
                 self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT,showmsg,True)
                 self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_REFRESHLOCALFILETABLE,"")
-                self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_REFRESHSTATIC,[session.filename,"接受文件完成"])
+                self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_REFRESHSTATIC,[session.filename,"接收文件成功"])
                 _msghead = self.packetMsg(MagicNum.MsgTypec.REQCLOSEMSG, 0)
                 NetSocketFun.NetSocketSend(session.sockfd,_msghead)
                 session.stop()
@@ -153,7 +153,7 @@ class RecvAgroupSignAndParam(MsgHandleInterface.MsgHandleInterface,object):
         else:
             showmsg = "会话密钥验证失败,发送方为恶意用户"
         self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_APPENDTEXT, showmsg, True)
-        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_REFRESHSTATIC,[session.filename,"接受文件完成"])
+        self.sendViewMsg(CommonData.ViewPublisherc.MAINFRAME_REFRESHSTATIC,[session.filename,"接收文件失败"])
         msghead = self.packetMsg(MagicNum.MsgTypec.IDENTITYVERIFYFAILED,0)
         NetSocketFun.NetSocketSend(session.sockfd,msghead)
         

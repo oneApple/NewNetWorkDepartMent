@@ -210,7 +210,7 @@ class MyFrame(wx.Frame):
         _filename = self.__netFileTable.GetCellValue(self.__gridNetCurPos,0)
         _contentSocket.ReqFile(_filename,self.username)
         self.__contentList.append(_contentSocket)
-        self.refreshStaticText([_filename,"正在请求分发"])
+        self.refreshStaticText([_filename,"接收分发文件"])
         return
     
     def createLeft3Button(self,panel,vbox):
